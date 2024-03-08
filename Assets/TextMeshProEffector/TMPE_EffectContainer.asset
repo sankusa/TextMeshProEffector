@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75d00a3fa36bafd429cf7d967192b196, type: 3}
+  m_Name: TMPE_EffectContainer
+  m_EditorClassIdentifier: 
+  _basicEffects:
+  - id: 0
+  _typingEffects:
+  - id: 1
+  _typingEventEffects:
+  - id: 2
+  - id: 3
+  - id: 4
+  references:
+    version: 1
+    00000000:
+      type: {class: Wave, ns: Kodama.TextMeshProEffector, asm: TextMeshProEffector}
+      data:
+        _tagName: wave
+        _amplitude: 231.62
+        _delay: 0.35
+        _speed: 4
+    00000001:
+      type: {class: Position, ns: TextMeshProEffector.TypingEffects, asm: TextMeshProEffector}
+      data:
+        _tagName: 
+        _delay: 0
+        _duration: 0
+        _from: {x: 0, y: 0, z: 0}
+        _to: {x: 0, y: 0, z: 0}
+        _curve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+    00000002:
+      type: {class: PauseTyping, ns: TextMeshProEffector.TypingEventEffects, asm: TextMeshProEffector}
+      data:
+        _tagName: pause
+        _pauseTime: 1
+    00000003:
+      type: {class: Log, ns: TextMeshProEffector.TypingEventEffects, asm: TextMeshProEffector}
+      data:
+        _tagName: log
+    00000004:
+      type: {class: PauseIfTargetCharacter, ns: TextMeshProEffector.TypingEventEffects, asm: TextMeshProEffector}
+      data:
+        _tagName: 
+        _targetCharacters: ",\u3001"
+        _seconds: 0.22
