@@ -168,6 +168,10 @@ namespace TextMeshProEffector {
         public override float GetElapsedTimeFromTypedByCharacter(TMPE_EffectorBase effector, int characterInfoIndex) {
             return _statusDic[effector].TypingStatuses[characterInfoIndex].ElapsedTimeFromTyped;
         }
+
+        public override bool IsTypedCharacter(TMPE_EffectorBase effector, int characterInfoIndex) {
+            return _statusDic[effector].TypingStatuses[characterInfoIndex].State == CharacterTypingState.Typed;
+        }
     }
 
     public abstract class TMPE_TypeWriterBase : ScriptableObject {
@@ -266,6 +270,7 @@ namespace TextMeshProEffector {
             Debug.LogWarning(nameof(GetElapsedTimeFromTypedByCharacter) + " is not implemented");
             return 0;
         }
+        public abstract bool IsTypedCharacter(TMPE_EffectorBase effector, int characterInfoIndex);
 
         // TypeWriterControlTag
         private static string[] _emptyTagNames = new string[0];

@@ -13,7 +13,7 @@ namespace TextMeshProEffector {
             for(int i = 0; i < textInfo.characterCount; i++) {
                 TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
                 if(tag == null || (tag.StartIndex <= charInfo.index && charInfo.index <= tag.EndIndex)) {
-                    if(effector.TypingInfo[i].Visiblity == CharacterVisiblity.Visible) {
+                    if(effector.TypingInfo[i].Visiblity == CharacterVisiblity.Visible && typeWriter.IsTypedCharacter(effector, i)) {
                         isPlaying |= UpdateVertexByCharacter(tag, effector, i, typeWriter.GetElapsedTimeFromTypedByCharacter(effector, i));
                     }
                 }
