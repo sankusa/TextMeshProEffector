@@ -16,7 +16,7 @@ namespace TextMeshProEffector {
         // [SerializeReference] private List<TMPE_TypingEventEffect> _typingEventEffects;
         // public List<TMPE_TypingEventEffect> TypingEventEffects => _typingEventEffects;
 
-        public void UpdateTextInfo_BasicEffect(IEffector effector) {
+        public void UpdateTextInfo_BasicEffect(TMPE_EffectorBase effector) {
             List<TMPE_Tag> tags = effector.TagContainer.BasicTags;
             foreach(TMPE_BasicEffect basicEffect in _basicEffects) {
                 if(string.IsNullOrEmpty(basicEffect.TagName)) {

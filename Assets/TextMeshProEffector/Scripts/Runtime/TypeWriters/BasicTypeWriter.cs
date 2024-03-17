@@ -15,7 +15,7 @@ namespace TextMeshProEffector.TypeWriters {
     }
     public class BasicTypeWriterStatus : TypeWriterStatus<BasicTypeWriterCharacterTypingStatus> {
         public int TypedCharacterCount {get; set;}
-        public override void Reset(IEffector effector) {
+        public override void Reset(TMPE_EffectorBase effector) {
             base.Reset(effector);
             TypedCharacterCount = 0;
         }
@@ -35,7 +35,7 @@ namespace TextMeshProEffector.TypeWriters {
             return false;
         }
 
-        public override void OnTextChanged(IEffector effector) {
+        public override void OnTextChanged(TMPE_EffectorBase effector) {
             base.OnTextChanged(effector);
             BasicTypeWriterStatus status = _statusDic[effector];
             List<TMPE_Tag> typeWriterControlTags = effector.TagContainer.TypeWriterControlTags[effector.GetTypeWriterIndex(this)];
@@ -50,7 +50,7 @@ namespace TextMeshProEffector.TypeWriters {
             }
         }
 
-        protected override void UpdateTypingMain(IEffector effector) {
+        protected override void UpdateTypingMain(TMPE_EffectorBase effector) {
             TMP_TextInfo textInfo = effector.TextInfo;
             BasicTypeWriterStatus status = _statusDic[effector];
 

@@ -34,18 +34,33 @@ namespace TextMeshProEffector {
         }
 
         public void Initialize(string sourceText) {
+            if(sourceText == null) {
+                Initialize(0);
+                return;
+            }
+
             Initialize(sourceText.Length);
             sourceText.CopyTo(0, _array, _length, sourceText.Length);
             _length = sourceText.Length;
         }
 
         public void Initialize(char[] sourceText) {
-            Initialize(sourceText.Length);
+            if(sourceText == null) {
+                Initialize(0);
+                return;
+            }
+
+            Initialize(sourceText == null ? 0 : sourceText.Length);
             System.Array.Copy(sourceText, _array, sourceText.Length);
             _length = sourceText.Length;
         }
 
         public void Initialize(uint[] sourceText, int length = -1) {
+            if(sourceText == null) {
+                Initialize(0);
+                return;
+            }
+
             if(length == -1) length = sourceText.Length;
             Initialize(length);
             for(int i = 0; i < length; i++) {
@@ -55,6 +70,11 @@ namespace TextMeshProEffector {
         }
 
         public void Initialize(StringBuilder sourceText) {
+            if(sourceText == null) {
+                Initialize(0);
+                return;
+            }
+
             Initialize(sourceText.Length);
             sourceText.CopyTo(0, _array, _length, sourceText.Length);
             _length = sourceText.Length;

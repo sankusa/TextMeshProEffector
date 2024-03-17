@@ -19,7 +19,7 @@ MonoBehaviour:
     00000000:
       type: {class: Wave, ns: Kodama.TextMeshProEffector, asm: TextMeshProEffector}
       data:
-        _tagName: wave
+        _tagName: 
         _amplitude: 9.32
         _delay: 0.5
         _speed: -3.81

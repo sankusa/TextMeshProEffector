@@ -13,7 +13,7 @@ using UnityEditor;
 
 namespace TextMeshProEffector {
     [ExecuteAlways, RequireComponent(typeof(TMP_Text))]
-    public abstract class TMPE_EffectorBase : MonoBehaviour, IEffector {
+    public abstract class TMPE_EffectorBase : MonoBehaviour {
 #if UNITY_EDITOR
         /// <summary>
         /// インスペクタが表示中か
@@ -41,32 +41,34 @@ namespace TextMeshProEffector {
         }
 #endif
         //タイピング開始前から描画を行うか
-        [SerializeField] protected CharacterVisiblity _defaultCharacterVisiblity = CharacterVisiblity.Invisible;
+        [SerializeField] protected CharacterVisiblity _defaultCharacterVisiblity = CharacterVisiblity.Visible;
 
         // 演出データ類
         [SerializeField] protected TMPE_EffectContainer _effectContainer;
         public TMPE_EffectContainer EffectContainer => _effectContainer;
 
-        [SerializeField] protected List<TMPE_TypeWriterSetting> _typeWriterSettings;
+        [SerializeField] protected List<TMPE_TypeWriterSetting> _typeWriterSettings = new List<TMPE_TypeWriterSetting>();
         public List<TMPE_TypeWriterSetting> TypeWriterSettings => _typeWriterSettings;
         
         // TMP
-        protected TMP_Text _tmpText;
-        public TMP_Text TextComponent => _tmpText;
+        protected TMP_Text _textComponent;
+        public TMP_Text TextComponent => _textComponent;
 
         [NonSerialized] protected TMP_TextInfo _textInfo;
         public TMP_TextInfo TextInfo => _textInfo; 
         
         // 元々の頂点情報のキャッシュ
         protected List<Color32[]> _originalColors32 = new List<Color32[]>();
+        public IReadOnlyList<Color32[]> OriginalColors32 => _originalColors32;
         protected List<Vector3[]> _originalVertices = new List<Vector3[]>();
+        public IReadOnlyList<Vector3[]> OriginalVertices => _originalVertices;
 
         // Tag
         protected TMPE_TagContainer _tagContainer = new TMPE_TagContainer();
         public TMPE_TagContainer TagContainer => _tagContainer;
 
         // タイピング関係の状態
-        private float _elapsedTimeFromTextChanged;
+        protected float _elapsedTimeFromTextChanged;
         public float ElapsedTimeFromTextChanged => _elapsedTimeFromTextChanged;
 
         protected TMPE_TypingInfo[] _typingInfo;
@@ -84,36 +86,21 @@ namespace TextMeshProEffector {
 
         // テキスト成形+タグ抽出のモジュール
         protected TMPE_TextPreprocessor _textPreprocessor = new TMPE_TextPreprocessor();
-#if UNITY_EDITOR
-        private TMPE_TextPreprocessorForEditor _textPreprocessorForEditor;
-#endif
-
-        // TMP_Textのinternalメンバにアクセスするためのリフレクション系オブジェクトのキャッシュ
-        private FieldInfo _textBackingArrayInfo;
-        private FieldInfo _textBackingArray_arrayInfo;
-        private FieldInfo _textBackingArray_countInfo;
-        private FieldInfo _inputSourceInfo;
-
-        // テキストの変更を検知するためのキャッシュ
-        private TMPE_TextBuffer _characterInfoOld = new TMPE_TextBuffer();
 
         // イベント
-        [SerializeField] private OneShotUnityEvent _onTypingCompleted;
+        [SerializeField] protected OneShotUnityEvent _onTypingCompleted = new OneShotUnityEvent();
         /// <summary>タイピング終了時コールバック</summary>
         public UnityEvent OnTypingCompleted => _onTypingCompleted.UnityEvent;
 
         // Unityイベント関数
-        void Awake() {
-            _tmpText = GetComponent<TMP_Text>();
+        protected virtual void Awake() {
+            _textComponent = GetComponent<TMP_Text>();
         }
 
         // Unityイベント関数
-        void OnEnable() {
+        protected virtual void OnEnable() {
             TMPro_EventManager.TEXT_CHANGED_EVENT.Add(OnTextChanged);
 #if UNITY_EDITOR
-            if(_textPreprocessorForEditor == null) _textPreprocessorForEditor = new TMPE_TextPreprocessorForEditor(this, _textPreprocessor);
-            _tmpText.textPreprocessor = _textPreprocessorForEditor;
-
             // コンパイル直後にはAwakeが呼ばれないため、エディタ上での動作を維持するためにOnEnable内で初期化
             if(EditorApplication.isPlaying == false) {
                 Initialize();
@@ -122,15 +109,12 @@ namespace TextMeshProEffector {
         }
 
         // Unityイベント関数
-        void OnDisable() {
+        protected virtual void OnDisable() {
             TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(OnTextChanged);
-#if UNITY_EDITOR
-            if(_tmpText.textPreprocessor == _textPreprocessorForEditor) _tmpText.textPreprocessor = null;
-#endif
         }
 
         // Unityイベント関数
-        void Start() {
+        protected virtual void Start() {
 #if UNITY_EDITOR
             if(EditorApplication.isPlaying) {
                 Initialize();
@@ -141,7 +125,7 @@ namespace TextMeshProEffector {
         }
 
         // Unityイベント関数
-        void LateUpdate() {
+        protected virtual void LateUpdate() {
             // this.SetTextを使用した場合はLateUpdate時点でレンダリング時のOnTextChanged呼び出しが確定しているので、OnTextChangedで呼ばれるUpdateGeometryをここで呼ばなくて済む
             // 時間経過系の処理もスキップ(テキスト設定時のフレームは時間=0で処理の方針)
             if(_setTextCalled) return;
@@ -190,7 +174,7 @@ namespace TextMeshProEffector {
         }
 
         // Unityイベント関数
-        void OnRenderObject() {
+        protected virtual void OnRenderObject() {
 #if UNITY_EDITOR
             if(Application.isPlaying == false) {
                 if(IsEditing && ForceUpdateInEditing) {
@@ -202,29 +186,22 @@ namespace TextMeshProEffector {
         }
 
         // Unityイベント関数
-        void OnDestroy() {
+        protected virtual void OnDestroy() {
             foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
                 typeWriterSetting.TypeWriter?.OnDetach(this);
             }
         }
 
         // 初期化処理
-        private void Initialize() {
+        protected virtual void Initialize() {
             _skipOnTextChanged = true;
-            _tmpText.ForceMeshUpdate(true); // TMPro_EventManager.TEXT_CHANGED_EVENTが発火
-            _textInfo = _tmpText.textInfo;
+            _textComponent.ForceMeshUpdate(true); // TMPro_EventManager.TEXT_CHANGED_EVENTが発火
+            _textInfo = _textComponent.textInfo;
             foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
                 typeWriterSetting.TypeWriter?.OnAttach(this);
             }
             ResetTypinRelatedValues();
             CacheVertexData();
-        }
-
-        /// <summary>タイピング開始</summary>
-        public void StartTyping() {
-            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
-                typeWriterSetting.TypeWriter?.StartTyping(this);
-            }
         }
 
         /// <summary>タイプライターのインデックスを取得</summary>
@@ -243,8 +220,8 @@ namespace TextMeshProEffector {
         // テキスト変更時のフレームでは、ジオメトリ加工後にテキスト変更に起因するメッシュの再生成が行われるため
         // 1フレームだけ未加工のジオメトリが表示されてしまう
         // 対策として、テキスト変更時は再度ジオメトリ加工を行う
-        private void OnTextChanged(Object obj) {
-            if(obj == _tmpText) {
+        protected virtual void OnTextChanged(Object obj) {
+            if(obj == _textComponent) {
                 if(_skipOnTextChanged) {
                     _skipOnTextChanged = false;
                     return;
@@ -252,92 +229,29 @@ namespace TextMeshProEffector {
 
                 if(_setTextCalled) {
                     _setTextCalled = false;
-                    UpdateCharacterInfoOld();
+                    ResetTypinRelatedValues();
                     CacheVertexData();
                     UpdateGeometry();
                     return;
                 }
 
-                TMP_CharacterInfo[] characterInfo = _textInfo.characterInfo;
-                
-                // テキストが変更されたかチェック
-                _characterInfoOld ??= new TMPE_TextBuffer();
-                if(_characterInfoOld.Capacity < _textInfo.characterCount) {
-                    _characterInfoOld.Initialize(Mathf.NextPowerOfTwo(_textInfo.characterCount));
-                }
-
-                bool different = _textInfo.characterCount != _characterInfoOld.Length;
-                int checkIndex = 0;
-                // 比較
-                for(; checkIndex < _textInfo.characterCount; checkIndex++) {
-                    if(characterInfo[checkIndex].character != _characterInfoOld[checkIndex]) {
-                        different = true;
-                        break;
-                    }
-                }
-                // 次の比較用にコピー
-                for(; checkIndex < _textInfo.characterCount; checkIndex++) {
-                    _characterInfoOld[checkIndex] = characterInfo[checkIndex].character;
-                }
-                _characterInfoOld.Length = _textInfo.characterCount;
-
-                // テキスト変更時
-                if(different) {
-                    // 設定された文字列からタグを除去してタグ情報のオブジェクトを作成
-                    if(_effectContainer == null) {
-                        _tagContainer.Clear();
-                    }
-                    else {
-                        if(_textBackingArrayInfo == null) {
-                            _textBackingArrayInfo = typeof(TMP_Text).GetField("m_TextBackingArray", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _textBackingArray_arrayInfo = _textBackingArrayInfo.FieldType.GetField("m_Array", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _textBackingArray_countInfo = _textBackingArrayInfo.FieldType.GetField("m_Count", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _inputSourceInfo = typeof(TMP_Text).GetField("m_inputSource", BindingFlags.NonPublic | BindingFlags.Instance);
-                        }
-
-                        // リッチテキストタグなどが除去される前のテキストを取得
-                        object textBackingArray = _textBackingArrayInfo.GetValue(_tmpText);
-                        uint[] textBackingArray_array = (uint[]) _textBackingArray_arrayInfo.GetValue(textBackingArray);
-                        int textBackingArray_count = (int) _textBackingArray_countInfo.GetValue(textBackingArray);
-
-#if UNITY_EDITOR
-                        // internal enum TextInputSources { TextInputBox = 0, SetText = 1, SetTextArray = 2, TextString = 3 };
-                        // 0,3の場合はTMP_Text内部でtextPreprocessorを使って文字列がパースされる
-                        int inputSource = (int) _inputSourceInfo.GetValue(_tmpText);
-                        // ITextPreprocessorを通さないケースの場合は文字列を流し直して無理やりITextPreprocessorを通す
-                        if(inputSource == 1 || inputSource == 2) {
-                            _tmpText.SetText(_tmpText.text);
-                        }
-#else
-                        // 加工+タグ情報オブジェクト生成
-                        _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
-                        _textPreprocessor.ProcessText(_effectContainer, _tagContainer);
-                        _tmpText.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
-#endif
-                    }
-                    // テキスト変更時共通処理
-                    ResetTypinRelatedValues();
-
-                    _skipOnTextChanged = true;
-                    _tmpText.ForceMeshUpdate(true);
-
-                    UpdateCharacterInfoOld();
-                    CacheVertexData();
-                    UpdateGeometry();
-                }
-                else {
-                    // テキスト以外のプロパティ変更時
-                    CacheVertexData();
-                    UpdateGeometry();
-                }
+                // テキスト以外のプロパティ変更時
+                ResetTypinRelatedValues();
+                CacheVertexData();
+                UpdateGeometry();
             }
         }
 
-        private void ResetTypinRelatedValues() {
+        protected virtual void ResetTypinRelatedValues() {
+            _tagContainer.PrepareTagLists(_typeWriterSettings.Count);
+
             _elapsedTimeFromTextChanged = 0;
             _typingPauseTimer = 0;
-            if(_typingInfo == null || _typingInfo.Length < _textInfo.characterCount) {
+            if(_typingInfo == null) {
                 _typingInfo = new TMPE_TypingInfo[Mathf.NextPowerOfTwo(_textInfo.characterCount)];
+            }
+            else if(_typingInfo.Length < _textInfo.characterCount) {
+                Array.Resize(ref _typingInfo, Mathf.NextPowerOfTwo(_textInfo.characterCount));
             }
             for(int i = 0; i < _typingInfo.Length; i++) {
                 _typingInfo[i].Reset(_defaultCharacterVisiblity);
@@ -352,7 +266,7 @@ namespace TextMeshProEffector {
         /// <summary>
         /// TMP_TextInfoの内容をキャッシュ
         /// </summary>
-        private void CacheVertexData() {
+        protected void CacheVertexData() {
             for(int i = 0; i < _textInfo.materialCount; i++) {
                 TMP_MeshInfo meshInfo = _textInfo.meshInfo[i];
                 if(i == _originalColors32.Count) _originalColors32.Add(new Color32[Mathf.NextPowerOfTwo(meshInfo.colors32.Length)]);
@@ -378,7 +292,7 @@ namespace TextMeshProEffector {
             }
         }
 
-        private void UpdateGeometry() {
+        protected void UpdateGeometry() {
             // キャッシュしておいた元々の値を設定
             for(int i = 0; i < _textInfo.materialCount; i++) {
                 Array.Copy(_originalColors32[i], _textInfo.meshInfo[i].colors32, _textInfo.meshInfo[i].colors32.Length);
@@ -427,7 +341,7 @@ namespace TextMeshProEffector {
             // TextMeshProUGUIインスペクタ上でのテキスト編集時、文字列長が0になった場合のみ
             // UpdateVertexDataが呼ばれるとメッシュが更新されない(詳細は未調査)
             if(_textInfo.characterCount > 0) {
-                _tmpText.UpdateVertexData(TMP_VertexDataUpdateFlags.All);
+                _textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.All);
             }
         }
 
@@ -435,7 +349,7 @@ namespace TextMeshProEffector {
         public void SetText(string text) {
             _textPreprocessor.Source.Initialize(text);
             _textPreprocessor.ProcessText(this);
-            _tmpText.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
+            _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
             ResetTypinRelatedValues();
 
             _setTextCalled = true;
@@ -445,18 +359,104 @@ namespace TextMeshProEffector {
         public void SetText(char[] text) {
             _textPreprocessor.Source.Initialize(text);
             _textPreprocessor.ProcessText(this);
-            _tmpText.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
+            _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
             ResetTypinRelatedValues();
 
             _setTextCalled = true;
         }
 
-        private void UpdateCharacterInfoOld() {
-            TMP_CharacterInfo[] characterInfo = _textInfo.characterInfo;
-            for(int i = 0; i < _textInfo.characterCount; i++) {
-                _characterInfoOld[i] = characterInfo[i].character;
+        public void StartTyping() {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.StartTyping(this);
             }
-            _characterInfoOld.Length = _textInfo.characterCount;
+        }
+        public void StartTyping(int typeWriterIndex) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter?.StartTyping(this);
+        }
+
+        public void PauseTyping() {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.PauseTyping(this);
+            }
+        }
+        public void PauseTyping(int typeWriterIndex) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter?.PauseTyping(this);
+        }
+
+        public void DelayTyping(float seconds) {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.DelayTyping(this, seconds);
+            }
+        }
+        public void DelayTyping(float seconds, int typeWriterIndex) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter?.DelayTyping(this, seconds);
+        }
+
+        public void ResumeTyping() {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.ResumeTyping(this);
+            }
+        }
+        public void ResumeTyping(int typeWriterIndex) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter?.ResumeTyping(this);
+        }
+
+        public bool IsPausedTyping(int typeWriterIndex) {
+            TMPE_TypeWriterSetting typeWriterSetting = _typeWriterSettings[typeWriterIndex];
+            if(typeWriterSetting.TypeWriter == null) return false;
+            return typeWriterSetting.TypeWriter.IsPausedTyping(this);
+        }
+        public void IsPausedTypingAny() {
+            bool paused = false;
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                if(typeWriterSetting.TypeWriter == null) continue;
+                paused |= typeWriterSetting.TypeWriter.IsPausedTyping(this);
+            }
+        }
+
+        public void SetTypingSpeed(float speed) {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.SetTypingSpeed(this, speed);
+            }
+        }
+        public void SetTypingSpeed(int typeWriterIndex, int speed) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter?.SetTypingSpeed(this, speed);
+        }
+
+        public bool IsStartedTyping(int typeWriterIndex) {
+            TMPE_TypeWriterSetting typeWriterSetting = _typeWriterSettings[typeWriterIndex];
+            if(typeWriterSetting.TypeWriter == null) return true;
+            return typeWriterSetting.TypeWriter.IsStartedTyping(this);
+        }
+
+        public bool IsFinishedTyping() {
+            bool isFinished = true;
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                if(typeWriterSetting.TypeWriter != null) {
+                    isFinished &= typeWriterSetting.TypeWriter.IsFinishedTyping(this);
+                }
+            }
+            return isFinished;
+        }
+        public bool IsFinishedTyping(int typeWriterIndex) {
+            TMPE_TypeWriterSetting typeWriterSetting = _typeWriterSettings[typeWriterIndex];
+            if(typeWriterSetting.TypeWriter == null) return true;
+            return typeWriterSetting.TypeWriter.IsFinishedTyping(this);
+        }
+
+        public bool IsPlayingTypingEffect() {
+            bool isPlaying = false;
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                if(typeWriterSetting.TypeWriter != null) {
+                    isPlaying |= typeWriterSetting.TypeWriter.IsPlaying(this);
+                }
+            }
+            return isPlaying;
+        }
+        public bool IsPlayingTypingEffect(int typeWriterIndex) {
+            TMPE_TypeWriterSetting typeWriterSetting = _typeWriterSettings[typeWriterIndex];
+            if(typeWriterSetting.TypeWriter == null) return false;
+            return typeWriterSetting.TypeWriter.IsPlaying(this);
         }
     }
 }

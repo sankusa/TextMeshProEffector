@@ -12,7 +12,7 @@ namespace TextMeshProEffector {
         public int NextTypeIndex {get; set;}
         public float NextTypeInterval {get; set;}
         public float Timer {get; set;}
-        public override void Reset(IEffector effector) {
+        public override void Reset(TMPE_EffectorBase effector) {
             base.Reset(effector);
             NextTypeIndex = 0;
             NextTypeInterval = 0;
@@ -25,16 +25,18 @@ namespace TextMeshProEffector {
         [SerializeField, Min(0)] private float _intervalPerChar;
         [SerializeField, Min(0)] private float _intervalPerCharRandomness;
 
-        public override void OnTextChanged(IEffector effector) {
+        public override void OnTextChanged(TMPE_EffectorBase effector) {
             base.OnTextChanged(effector);
             _statusDic[effector].NextTypeIndex = (int) (Random.value * effector.TextInfo.characterCount);
         }
 
-        protected override void UpdateTypingMain(IEffector effector) {
+        protected override void UpdateTypingMain(TMPE_EffectorBase effector) {
             TMP_TextInfo textInfo = effector.TextInfo;
             RandomTypeWriterStatus status = _statusDic[effector];
 
             status.Timer += Time.deltaTime * status.TypeSpeed;
+
+            if(textInfo.characterCount == 0) return;
 
             while(status.Timer > status.NextTypeInterval) {
                 status.Timer -= status.NextTypeInterval;

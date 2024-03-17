@@ -12,7 +12,7 @@ namespace TextMeshProEffector {
 
         private enum TagType {Basic, Typing, TypingEvent, TypeWriterControl}
 
-        public void ProcessText(IEffector effector) {
+        public void ProcessText(TMPE_EffectorBase effector) {
             TMPE_EffectContainer effectContainer = effector.EffectContainer;
             TMPE_TagContainer tagContainer = effector.TagContainer;
             List<TMPE_TypeWriterSetting> typeWriterSettings = effector.TypeWriterSettings;

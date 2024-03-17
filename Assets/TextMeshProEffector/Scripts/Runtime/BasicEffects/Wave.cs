@@ -30,7 +30,7 @@ d : delay";
             return true;
         }
 
-        protected override void UpdateVertexByCharacter(TMPE_Tag tag, IEffector effector, int charInfoIndex) {
+        protected override void UpdateVertexByCharacter(TMPE_Tag tag, TMPE_EffectorBase effector, int charInfoIndex) {
             TMP_TextInfo textInfo = effector.TextInfo;
             TMP_CharacterInfo charInfo = textInfo.characterInfo[charInfoIndex];
             if(charInfo.isVisible == false) return;

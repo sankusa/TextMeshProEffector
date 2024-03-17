@@ -8,7 +8,7 @@ namespace TextMeshProEffector {
     [CustomPropertyDrawer(typeof(TMPE_TypeWriterSetting))]
     public class TMPE_TypeWriterSettingDrawer : PropertyDrawer {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-            IEffector effector = property.serializedObject.targetObject as IEffector;
+            TMPE_EffectorBase effector = property.serializedObject.targetObject as TMPE_EffectorBase;
             SerializedProperty typeWriterProp = property.FindPropertyRelative("_typeWriter");
             SerializedProperty startTypingAutoProp = property.FindPropertyRelative("_startTypingAuto");
 
