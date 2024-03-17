@@ -14,47 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _basicEffects:
   - id: 0
-  _typingEffects:
-  - id: 1
-  _typingEventEffects:
-  - id: 2
-  - id: 3
-  - id: 4
   references:
     version: 1
     00000000:
       type: {class: Wave, ns: Kodama.TextMeshProEffector, asm: TextMeshProEffector}
       data:
         _tagName: wave
-        _amplitude: 231.62
-        _delay: 0.35
-        _speed: 4
-    00000001:
-      type: {class: Position, ns: TextMeshProEffector.TypingEffects, asm: TextMeshProEffector}
-      data:
-        _tagName: 
-        _delay: 0
-        _duration: 0
-        _from: {x: 0, y: 0, z: 0}
-        _to: {x: 0, y: 0, z: 0}
-        _curve:
-          serializedVersion: 2
-          m_Curve: []
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-    00000002:
-      type: {class: PauseTyping, ns: TextMeshProEffector.TypingEventEffects, asm: TextMeshProEffector}
-      data:
-        _tagName: pause
-        _pauseTime: 1
-    00000003:
-      type: {class: Log, ns: TextMeshProEffector.TypingEventEffects, asm: TextMeshProEffector}
-      data:
-        _tagName: log
-    00000004:
-      type: {class: PauseIfTargetCharacter, ns: TextMeshProEffector.TypingEventEffects, asm: TextMeshProEffector}
-      data:
-        _tagName: 
-        _targetCharacters: ",\u3001"
-        _seconds: 0.22
+        _amplitude: 9.32
+        _delay: 0.5
+        _speed: -3.81

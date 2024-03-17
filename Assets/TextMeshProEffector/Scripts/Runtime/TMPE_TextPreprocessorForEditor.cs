@@ -41,7 +41,7 @@ namespace TextMeshProEffector {
             else {
                 // 有効なタグを文字列から切り取り、タグ情報オブジェクトを作成
                 _textPreprocessor.Source.Initialize(sourcetext);
-                _textPreprocessor.ProcessText(effectContainer, _effector.TagContainer);
+                _textPreprocessor.ProcessText(_effector);
                 processedText = _textPreprocessor.Destination.ToString();
             }
             // キャッシュ

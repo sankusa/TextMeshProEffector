@@ -7,15 +7,16 @@ using UnityEngine;
 namespace TextMeshProEffector {
     [Serializable]
     public abstract class TMPE_BasicEffect : TMPE_EffectBase {
-        public virtual void UpdateTextInfo(TMPE_Tag tag, IEffector effector, TMP_TextInfo textInfo) {
+        public virtual void UpdateVertex(TMPE_Tag tag, IEffector effector) {
+            TMP_TextInfo textInfo = effector.TextInfo;
             for(int i = 0; i < textInfo.characterCount; i++) {
                 TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
                 if(tag == null || (tag.StartIndex <= charInfo.index && charInfo.index <= tag.EndIndex)) {
-                    UpdateTextInfoByCharacter(tag, effector, textInfo, charInfo, i);
+                    UpdateVertexByCharacter(tag, effector, i);
                 }
             }
         }
 
-        protected virtual void UpdateTextInfoByCharacter(TMPE_Tag tag, IEffector effector, TMP_TextInfo textInfo, TMP_CharacterInfo charInfo, int charInfoIndex) {}
+        protected virtual void UpdateVertexByCharacter(TMPE_Tag tag, IEffector effector, int charInfoIndex) {}
     }
 }

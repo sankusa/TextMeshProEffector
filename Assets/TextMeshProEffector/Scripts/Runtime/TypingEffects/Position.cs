@@ -11,10 +11,13 @@ namespace TextMeshProEffector.TypingEffects {
         [SerializeField] private Vector3 _to;
         [SerializeField] private AnimationCurve _curve = new AnimationCurve();
 
-        protected override bool UpdateTextInfoByCharacter(TMPE_Tag tag, IEffector effector, TMP_TextInfo textInfo, TMP_CharacterInfo charInfo, int charInfoIndex) {
+        protected override bool UpdateTextInfoByCharacter(TMPE_Tag tag, IEffector effector, int charInfoIndex, float elapsedTime) {
+            TMP_TextInfo textInfo = effector.TextInfo;
+            TMP_CharacterInfo charInfo = textInfo.characterInfo[charInfoIndex];
+            
             if(charInfo.isVisible == false) return false;
 
-            float elapsed = effector.ElapsedTimesFromTyped[charInfoIndex];
+            float elapsed = elapsedTime;
             float progress = Mathf.Clamp01((elapsed - _delay) / _duration);
             float curveValue = _curve.Evaluate(progress);
             Vector3 offset = Vector3.Lerp(_from, _to, curveValue);

@@ -13,6 +13,6 @@ namespace TextMeshProEffector {
         }
 
         public virtual TriggerTiming Timing => TriggerTiming.AfterTyping;
-        public virtual void OnEventTriggerd(TMPE_Tag tag, IEffector effector, TMP_TextInfo textInfo, TMP_CharacterInfo characterInfo, int characterInfoIndex) {}
+        public virtual void OnEventTriggerd(TMPE_Tag tag, IEffector effector, TMPE_TypeWriterBase typeWriter, TMP_CharacterInfo characterInfo, int characterInfoIndex) {}
     }
 }

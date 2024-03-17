@@ -1,0 +1,17 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace TextMeshProEffector {
+    public enum CharacterVisiblity {
+        Invisible = 0,
+        Visible = 1,
+    }
+
+    public struct TMPE_TypingInfo {
+        public CharacterVisiblity Visiblity {get; set;}
+        public void Reset(CharacterVisiblity visiblity) {
+            Visiblity = visiblity;
+        }
+    }
+}

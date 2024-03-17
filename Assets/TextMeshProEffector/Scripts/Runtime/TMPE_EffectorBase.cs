@@ -13,7 +13,7 @@ using UnityEditor;
 
 namespace TextMeshProEffector {
     [ExecuteAlways, RequireComponent(typeof(TMP_Text))]
-    public class TMPE_Effector : MonoBehaviour, IEffector {
+    public abstract class TMPE_EffectorBase : MonoBehaviour, IEffector {
 #if UNITY_EDITOR
         /// <summary>
         /// インスペクタが表示中か
@@ -23,9 +23,9 @@ namespace TextMeshProEffector {
         /// <summary>
         /// インスペクタ表示中にUpdateを呼ぶか
         /// </summary>
-        private static bool _forceUpdateInEditing;
-        private static bool _forceUpdateInEditingIsUsed;
-        private const string _forceUpdateInEditingSessionStateKey = nameof(TMPE_Effector) + "_" + nameof(ForceUpdateInEditing);
+        protected static bool _forceUpdateInEditing;
+        protected static bool _forceUpdateInEditingIsUsed;
+        protected const string _forceUpdateInEditingSessionStateKey = nameof(TMPE_Effector) + "_" + nameof(ForceUpdateInEditing);
         public static bool ForceUpdateInEditing {
             get {
                 if(_forceUpdateInEditingIsUsed == false) {
@@ -41,49 +41,49 @@ namespace TextMeshProEffector {
         }
 #endif
         //タイピング開始前から描画を行うか
-        [SerializeField] private CharacterVisiblity _defaultCharacterVisiblity = CharacterVisiblity.Invisible;
+        [SerializeField] protected CharacterVisiblity _defaultCharacterVisiblity = CharacterVisiblity.Invisible;
 
         // 演出データ類
-        [SerializeField] private TMPE_EffectContainer _effectContainer;
+        [SerializeField] protected TMPE_EffectContainer _effectContainer;
         public TMPE_EffectContainer EffectContainer => _effectContainer;
 
-        [SerializeField] private List<TMPE_TypeWriterSetting> _typeWriterSettings;
+        [SerializeField] protected List<TMPE_TypeWriterSetting> _typeWriterSettings;
         public List<TMPE_TypeWriterSetting> TypeWriterSettings => _typeWriterSettings;
         
         // TMP
-        private TMP_Text _tmpText;
+        protected TMP_Text _tmpText;
         public TMP_Text TextComponent => _tmpText;
 
-        [NonSerialized] private TMP_TextInfo _textInfo;
+        [NonSerialized] protected TMP_TextInfo _textInfo;
         public TMP_TextInfo TextInfo => _textInfo; 
         
         // 元々の頂点情報のキャッシュ
-        private List<Color32[]> _originalColors32 = new List<Color32[]>();
-        private List<Vector3[]> _originalVertices = new List<Vector3[]>();
+        protected List<Color32[]> _originalColors32 = new List<Color32[]>();
+        protected List<Vector3[]> _originalVertices = new List<Vector3[]>();
 
         // Tag
-        private TMPE_TagContainer _tagContainer = new TMPE_TagContainer();
+        protected TMPE_TagContainer _tagContainer = new TMPE_TagContainer();
         public TMPE_TagContainer TagContainer => _tagContainer;
 
         // タイピング関係の状態
         private float _elapsedTimeFromTextChanged;
         public float ElapsedTimeFromTextChanged => _elapsedTimeFromTextChanged;
 
-        private TMPE_TypingInfo[] _typingInfo;
+        protected TMPE_TypingInfo[] _typingInfo;
         public TMPE_TypingInfo[] TypingInfo => _typingInfo;
 
-        private float _typingPauseTimer;
+        protected float _typingPauseTimer;
         public float TypingPauseTimer {
             get => _typingPauseTimer;
             set => _typingPauseTimer = value;
         }
 
         // 処理フロー操作用のフラグ
-        private bool _skipOnTextChanged; // TMPro_EventManager.TEXT_CHANGED_EVENTの再帰呼び出しによる無限ループ回避用
-        private bool _setTextCalled; // 特定のフローで重めの処理が2重で行われてしまうのを回避
+        protected bool _skipOnTextChanged; // TMPro_EventManager.TEXT_CHANGED_EVENTの再帰呼び出しによる無限ループ回避用
+        protected bool _setTextCalled; // 特定のフローで重めの処理が2重で行われてしまうのを回避
 
         // テキスト成形+タグ抽出のモジュール
-        private TMPE_TextPreprocessor _textPreprocessor = new TMPE_TextPreprocessor();
+        protected TMPE_TextPreprocessor _textPreprocessor = new TMPE_TextPreprocessor();
 #if UNITY_EDITOR
         private TMPE_TextPreprocessorForEditor _textPreprocessorForEditor;
 #endif

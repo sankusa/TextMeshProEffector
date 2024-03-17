@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector {
@@ -89,7 +90,10 @@ namespace TextMeshProEffector {
         }
 
         public TMPE_TagAttribute GetAttribute(string name) {
-            return _attributes.Find(x => x.Name == name);
+            foreach(TMPE_TagAttribute attribute in _attributes) {
+                if(attribute.Name == name) return attribute;
+            }
+            return null;
         }
     }
 }

@@ -1,106 +1,17 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using Object = UnityEngine.Object;
-using System.Reflection;
-using System.Linq;
+using TMPro;
+using System;
 using UnityEngine.Events;
+using Object = UnityEngine.Object;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace TextMeshProEffector {
-    [ExecuteAlways, RequireComponent(typeof(TMP_Text))]
-    public class TMPE_Effector : MonoBehaviour, IEffector {
-#if UNITY_EDITOR
-        /// <summary>
-        /// インスペクタが表示中か
-        /// </summary>
-        public static bool IsEditing;
-
-        /// <summary>
-        /// インスペクタ表示中にUpdateを呼ぶか
-        /// </summary>
-        private static bool _forceUpdateInEditing;
-        private static bool _forceUpdateInEditingIsUsed;
-        private const string _forceUpdateInEditingSessionStateKey = nameof(TMPE_Effector) + "_" + nameof(ForceUpdateInEditing);
-        public static bool ForceUpdateInEditing {
-            get {
-                if(_forceUpdateInEditingIsUsed == false) {
-                    _forceUpdateInEditing = SessionState.GetBool(_forceUpdateInEditingSessionStateKey, false);
-                    _forceUpdateInEditingIsUsed = true;
-                }
-                return _forceUpdateInEditing;
-            }
-            set {
-                _forceUpdateInEditing = value;
-                SessionState.SetBool(_forceUpdateInEditingSessionStateKey, value);
-            }
-        }
-#endif
-        //タイピング開始前から描画を行うか
-        [SerializeField] private CharacterVisiblity _defaultCharacterVisiblity = CharacterVisiblity.Invisible;
-
-        // 演出データ類
-        [SerializeField] private TMPE_EffectContainer _effectContainer;
-        public TMPE_EffectContainer EffectContainer => _effectContainer;
-
-        [SerializeField] private List<TMPE_TypeWriterSetting> _typeWriterSettings;
-        public List<TMPE_TypeWriterSetting> TypeWriterSettings => _typeWriterSettings;
-        
-        // TMP
-        private TMP_Text _tmpText;
-        public TMP_Text TextComponent => _tmpText;
-
-        [NonSerialized] private TMP_TextInfo _textInfo;
-        public TMP_TextInfo TextInfo => _textInfo; 
-        
-        // 元々の頂点情報のキャッシュ
-        private List<Color32[]> _originalColors32 = new List<Color32[]>();
-        private List<Vector3[]> _originalVertices = new List<Vector3[]>();
-
-        // Tag
-        private TMPE_TagContainer _tagContainer = new TMPE_TagContainer();
-        public TMPE_TagContainer TagContainer => _tagContainer;
-
-        // タイピング関係の状態
-        private float _elapsedTimeFromTextChanged;
-        public float ElapsedTimeFromTextChanged => _elapsedTimeFromTextChanged;
-
-        private TMPE_TypingInfo[] _typingInfo;
-        public TMPE_TypingInfo[] TypingInfo => _typingInfo;
-
-        private float _typingPauseTimer;
-        public float TypingPauseTimer {
-            get => _typingPauseTimer;
-            set => _typingPauseTimer = value;
-        }
-
-        // 処理フロー操作用のフラグ
-        private bool _skipOnTextChanged; // TMPro_EventManager.TEXT_CHANGED_EVENTの再帰呼び出しによる無限ループ回避用
-        private bool _setTextCalled; // 特定のフローで重めの処理が2重で行われてしまうのを回避
-
-        // テキスト成形+タグ抽出のモジュール
-        private TMPE_TextPreprocessor _textPreprocessor = new TMPE_TextPreprocessor();
-#if UNITY_EDITOR
-        private TMPE_TextPreprocessorForEditor _textPreprocessorForEditor;
-#endif
-
-        // TMP_Textのinternalメンバにアクセスするためのリフレクション系オブジェクトのキャッシュ
-        private FieldInfo _textBackingArrayInfo;
-        private FieldInfo _textBackingArray_arrayInfo;
-        private FieldInfo _textBackingArray_countInfo;
-        private FieldInfo _inputSourceInfo;
-
-        // テキストの変更を検知するためのキャッシュ
-        private TMPE_TextBuffer _characterInfoOld = new TMPE_TextBuffer();
-
-        // イベント
-        [SerializeField] private OneShotUnityEvent _onTypingCompleted;
-        /// <summary>タイピング終了時コールバック</summary>
-        public UnityEvent OnTypingCompleted => _onTypingCompleted.UnityEvent;
+    public class TMPE_LeanEffector : TMPE_EffectorBase {
 
         // Unityイベント関数
         void Awake() {
@@ -111,9 +22,6 @@ namespace TextMeshProEffector {
         void OnEnable() {
             TMPro_EventManager.TEXT_CHANGED_EVENT.Add(OnTextChanged);
 #if UNITY_EDITOR
-            if(_textPreprocessorForEditor == null) _textPreprocessorForEditor = new TMPE_TextPreprocessorForEditor(this, _textPreprocessor);
-            _tmpText.textPreprocessor = _textPreprocessorForEditor;
-
             // コンパイル直後にはAwakeが呼ばれないため、エディタ上での動作を維持するためにOnEnable内で初期化
             if(EditorApplication.isPlaying == false) {
                 Initialize();
@@ -124,9 +32,6 @@ namespace TextMeshProEffector {
         // Unityイベント関数
         void OnDisable() {
             TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(OnTextChanged);
-#if UNITY_EDITOR
-            if(_tmpText.textPreprocessor == _textPreprocessorForEditor) _tmpText.textPreprocessor = null;
-#endif
         }
 
         // Unityイベント関数
@@ -252,83 +157,9 @@ namespace TextMeshProEffector {
 
                 if(_setTextCalled) {
                     _setTextCalled = false;
-                    UpdateCharacterInfoOld();
                     CacheVertexData();
                     UpdateGeometry();
                     return;
-                }
-
-                TMP_CharacterInfo[] characterInfo = _textInfo.characterInfo;
-                
-                // テキストが変更されたかチェック
-                _characterInfoOld ??= new TMPE_TextBuffer();
-                if(_characterInfoOld.Capacity < _textInfo.characterCount) {
-                    _characterInfoOld.Initialize(Mathf.NextPowerOfTwo(_textInfo.characterCount));
-                }
-
-                bool different = _textInfo.characterCount != _characterInfoOld.Length;
-                int checkIndex = 0;
-                // 比較
-                for(; checkIndex < _textInfo.characterCount; checkIndex++) {
-                    if(characterInfo[checkIndex].character != _characterInfoOld[checkIndex]) {
-                        different = true;
-                        break;
-                    }
-                }
-                // 次の比較用にコピー
-                for(; checkIndex < _textInfo.characterCount; checkIndex++) {
-                    _characterInfoOld[checkIndex] = characterInfo[checkIndex].character;
-                }
-                _characterInfoOld.Length = _textInfo.characterCount;
-
-                // テキスト変更時
-                if(different) {
-                    // 設定された文字列からタグを除去してタグ情報のオブジェクトを作成
-                    if(_effectContainer == null) {
-                        _tagContainer.Clear();
-                    }
-                    else {
-                        if(_textBackingArrayInfo == null) {
-                            _textBackingArrayInfo = typeof(TMP_Text).GetField("m_TextBackingArray", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _textBackingArray_arrayInfo = _textBackingArrayInfo.FieldType.GetField("m_Array", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _textBackingArray_countInfo = _textBackingArrayInfo.FieldType.GetField("m_Count", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _inputSourceInfo = typeof(TMP_Text).GetField("m_inputSource", BindingFlags.NonPublic | BindingFlags.Instance);
-                        }
-
-                        // リッチテキストタグなどが除去される前のテキストを取得
-                        object textBackingArray = _textBackingArrayInfo.GetValue(_tmpText);
-                        uint[] textBackingArray_array = (uint[]) _textBackingArray_arrayInfo.GetValue(textBackingArray);
-                        int textBackingArray_count = (int) _textBackingArray_countInfo.GetValue(textBackingArray);
-
-#if UNITY_EDITOR
-                        // internal enum TextInputSources { TextInputBox = 0, SetText = 1, SetTextArray = 2, TextString = 3 };
-                        // 0,3の場合はTMP_Text内部でtextPreprocessorを使って文字列がパースされる
-                        int inputSource = (int) _inputSourceInfo.GetValue(_tmpText);
-                        // ITextPreprocessorを通さないケースの場合は文字列を流し直して無理やりITextPreprocessorを通す
-                        if(inputSource == 1 || inputSource == 2) {
-                            _tmpText.SetText(_tmpText.text);
-                        }
-#else
-                        // 加工+タグ情報オブジェクト生成
-                        _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
-                        _textPreprocessor.ProcessText(_effectContainer, _tagContainer);
-                        _tmpText.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
-#endif
-                    }
-                    // テキスト変更時共通処理
-                    ResetTypinRelatedValues();
-
-                    _skipOnTextChanged = true;
-                    _tmpText.ForceMeshUpdate(true);
-
-                    UpdateCharacterInfoOld();
-                    CacheVertexData();
-                    UpdateGeometry();
-                }
-                else {
-                    // テキスト以外のプロパティ変更時
-                    CacheVertexData();
-                    UpdateGeometry();
                 }
             }
         }
@@ -449,14 +280,6 @@ namespace TextMeshProEffector {
             ResetTypinRelatedValues();
 
             _setTextCalled = true;
-        }
-
-        private void UpdateCharacterInfoOld() {
-            TMP_CharacterInfo[] characterInfo = _textInfo.characterInfo;
-            for(int i = 0; i < _textInfo.characterCount; i++) {
-                _characterInfoOld[i] = characterInfo[i].character;
-            }
-            _characterInfoOld.Length = _textInfo.characterCount;
         }
     }
 }

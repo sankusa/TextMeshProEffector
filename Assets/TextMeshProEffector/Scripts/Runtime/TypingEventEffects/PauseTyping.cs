@@ -8,8 +8,8 @@ namespace TextMeshProEffector.TypingEventEffects {
         public override TriggerTiming Timing => TriggerTiming.BeforeTyping;
 
         [SerializeField] private float _pauseTime;
-        public override void OnEventTriggerd(TMPE_Tag tag, IEffector effector, TMP_TextInfo textInfo, TMP_CharacterInfo characterInfo, int characterInfoIndex) {
-            effector.TypingPauseTimer = _pauseTime;
+        public override void OnEventTriggerd(TMPE_Tag tag, IEffector effector, TMPE_TypeWriterBase typeWriter, TMP_CharacterInfo characterInfo, int characterInfoIndex) {
+            typeWriter.Pause(effector, _pauseTime);
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TextMeshProEffector.TypingEventEffects {
     public class Log : TMPE_TypingEventEffect {
-        public override void OnEventTriggerd(TMPE_Tag tag, IEffector effector, TMP_TextInfo textInfo, TMP_CharacterInfo characterInfo, int characterInfoIndex) {
+        public override void OnEventTriggerd(TMPE_Tag tag, IEffector effector, TMPE_TypeWriterBase typeWriter, TMP_CharacterInfo characterInfo, int characterInfoIndex) {
             Debug.Log(characterInfo.character);
         }
     }
