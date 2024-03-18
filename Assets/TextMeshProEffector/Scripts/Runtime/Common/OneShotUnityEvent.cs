@@ -9,7 +9,7 @@ using UnityEditor;
 
 namespace TextMeshProEffector {
     [Serializable]
-    public class OneShotUnityEvent {
+    internal class OneShotUnityEvent {
         [NonSerialized] private bool _isInvoked;
         public bool IsInvoked => _isInvoked;
 

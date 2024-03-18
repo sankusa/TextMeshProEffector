@@ -12,14 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75d00a3fa36bafd429cf7d967192b196, type: 3}
   m_Name: TMPE_EffectContainer
   m_EditorClassIdentifier: 
-  _basicEffects:
-  - id: 0
+  _basicEffects: []
   references:
     version: 1
-    00000000:
-      type: {class: Wave, ns: Kodama.TextMeshProEffector, asm: TextMeshProEffector}
-      data:
-        _tagName: 
-        _amplitude: 9.32
-        _delay: 0.5
-        _speed: -3.81

@@ -71,8 +71,8 @@ namespace TextMeshProEffector {
         protected float _elapsedTimeFromTextChanged;
         public float ElapsedTimeFromTextChanged => _elapsedTimeFromTextChanged;
 
-        protected TMPE_TypingInfo[] _typingInfo;
-        public TMPE_TypingInfo[] TypingInfo => _typingInfo;
+        protected TMPE_CharacterTypingInfo[] _typingInfo;
+        public TMPE_CharacterTypingInfo[] TypingInfo => _typingInfo;
 
         protected float _typingPauseTimer;
         public float TypingPauseTimer {
@@ -88,7 +88,7 @@ namespace TextMeshProEffector {
         protected TMPE_TextPreprocessor _textPreprocessor = new TMPE_TextPreprocessor();
 
         // イベント
-        [SerializeField] protected OneShotUnityEvent _onTypingCompleted = new OneShotUnityEvent();
+        [SerializeField] private protected OneShotUnityEvent _onTypingCompleted = new OneShotUnityEvent();
         /// <summary>タイピング終了時コールバック</summary>
         public UnityEvent OnTypingCompleted => _onTypingCompleted.UnityEvent;
 
@@ -248,7 +248,7 @@ namespace TextMeshProEffector {
             _elapsedTimeFromTextChanged = 0;
             _typingPauseTimer = 0;
             if(_typingInfo == null) {
-                _typingInfo = new TMPE_TypingInfo[Mathf.NextPowerOfTwo(_textInfo.characterCount)];
+                _typingInfo = new TMPE_CharacterTypingInfo[Mathf.NextPowerOfTwo(_textInfo.characterCount)];
             }
             else if(_typingInfo.Length < _textInfo.characterCount) {
                 Array.Resize(ref _typingInfo, Mathf.NextPowerOfTwo(_textInfo.characterCount));
@@ -257,6 +257,7 @@ namespace TextMeshProEffector {
                 _typingInfo[i].Reset(_defaultCharacterVisiblity);
             }
             foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.Reset();
                 typeWriterSetting.TypeWriter?.OnTextChanged(this);
             }
 
@@ -301,24 +302,26 @@ namespace TextMeshProEffector {
 
             // 描画情報を加工
             _effectContainer?.UpdateTextInfo_BasicEffect(this);
-            bool typeWriterPlaying = false;
+            bool anyTypeWriterPlaying = false;
+            bool allTypeWriterFinishedTyping = true;
             for(int i = 0; i < _typeWriterSettings.Count; i++) {
                 TMPE_TypeWriterSetting typeWriterSetting = _typeWriterSettings[i];
                 if(typeWriterSetting.TypeWriter == null) continue;
-                typeWriterPlaying |= typeWriterSetting.TypeWriter.UpdateVertex(this, i);
+                bool currentTypeWriterPlaying = typeWriterSetting.TypeWriter.UpdateVertex(this, i);
+                bool currentTypeWriterFinishedTyping = typeWriterSetting.TypeWriter.IsFinishedTyping(this);
+                if(typeWriterSetting.OnTypingCompletedInternal.IsInvoked == false) {
+                    if(currentTypeWriterPlaying == false && currentTypeWriterFinishedTyping) {
+                        typeWriterSetting.OnTypingCompletedInternal.Invoke();
+                    }
+                }
+                anyTypeWriterPlaying |= currentTypeWriterPlaying;
+                allTypeWriterFinishedTyping &= currentTypeWriterFinishedTyping;
             }
 
             // タイピング終了判定
             if(_onTypingCompleted.IsInvoked == false) {
-                if(typeWriterPlaying == false) {
-                    int unfinishedTypeWriterCount = 0;
-                    for(int i = 0; i < _typeWriterSettings.Count; i++) {
-                        TMPE_TypeWriterSetting typeWriterSetting = _typeWriterSettings[i];
-                        if(typeWriterSetting.TypeWriter != null && typeWriterSetting.TypeWriter.IsFinishedTyping(this) == false) {
-                            unfinishedTypeWriterCount++;
-                        }
-                    }
-                    if(unfinishedTypeWriterCount == 0) _onTypingCompleted.Invoke();
+                if(anyTypeWriterPlaying == false && allTypeWriterFinishedTyping) {
+                    _onTypingCompleted.Invoke();
                 }
             }
 

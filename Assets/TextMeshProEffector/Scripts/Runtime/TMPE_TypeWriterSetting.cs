@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace TextMeshProEffector {
     public enum AutoStartTypingType {
@@ -31,5 +32,17 @@ namespace TextMeshProEffector {
 
         [SerializeField, Min(0)] private float _repeatInterval;
         public float RepeatInterval => _repeatInterval;
+#region Event
+        [SerializeField] private UnityEvent<int> _onCharacterTyped;
+        public UnityEvent<int> OnCharacterTyped => _onCharacterTyped;
+
+        [SerializeField] private OneShotUnityEvent _onTypingCompleted;
+        internal OneShotUnityEvent OnTypingCompletedInternal => _onTypingCompleted;
+        public UnityEvent OnTypingCompleted => _onTypingCompleted.UnityEvent;
+#endregion
+
+        public void Reset() {
+            _onTypingCompleted.Reset();
+        }
     }
 }

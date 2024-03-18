@@ -73,6 +73,18 @@ namespace TextMeshProEffector {
                 EditorGUI.PropertyField(repeatIntervalRect, repeatIntervalProp);
                 EditorGUI.indentLevel--;
             }
+
+            SerializedProperty onCharacterTypedProp = property.FindPropertyRelative("_onCharacterTyped");
+            float onCharacterTypedHeight = EditorGUI.GetPropertyHeight(onCharacterTypedProp);
+            Rect onCharacterTypedRect = new Rect(position) {height = onCharacterTypedHeight};
+            position.yMin += onCharacterTypedHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.PropertyField(onCharacterTypedRect, onCharacterTypedProp);
+
+            SerializedProperty onTypingCompletedProp = property.FindPropertyRelative("_onTypingCompleted");
+            float onTypingCompletedHeight = EditorGUI.GetPropertyHeight(onTypingCompletedProp);
+            Rect onTypingCompletedRect = new Rect(position) {height = onTypingCompletedHeight};
+            position.yMin += onTypingCompletedHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.PropertyField(onTypingCompletedRect, onTypingCompletedProp);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -87,6 +99,12 @@ namespace TextMeshProEffector {
             if(repeatProp.boolValue) {
                 height += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             }
+
+            SerializedProperty onCharacterTypedProp = property.FindPropertyRelative("_onCharacterTyped");
+            height += EditorGUI.GetPropertyHeight(onCharacterTypedProp);
+
+            SerializedProperty onTypingCompletedProp = property.FindPropertyRelative("_onTypingCompleted");
+            height += EditorGUI.GetPropertyHeight(onTypingCompletedProp);
             return height;
         }
     }

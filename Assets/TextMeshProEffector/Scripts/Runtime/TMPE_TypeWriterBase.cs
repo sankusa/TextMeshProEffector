@@ -108,9 +108,12 @@ namespace TextMeshProEffector {
 
         protected abstract void UpdateTypingMain(TMPE_EffectorBase effector);
 
-        public bool TryType(TMPE_EffectorBase effector, int characterInfoIndex, bool ignoreTypingEvent = false) {
+        public bool TryType(TMPE_EffectorBase effector, int characterInfoIndex, bool force = false, bool ignoreTypingEvent = false) {
             Status status = _statusDic[effector];
-            if(status.IsPaused || status.DelayTimer > 0) return false;
+
+            if(force == false) {
+                if(status.IsPaused || status.DelayTimer > 0) return false;
+            }
 
             if(status.TypingStatuses[characterInfoIndex].State == CharacterTypingState.Typed) return true;
 
@@ -120,9 +123,12 @@ namespace TextMeshProEffector {
                 status.TypingStatuses[characterInfoIndex].BeforeTypingEventInvoked = true;
             }
 
-            if(status.IsPaused || status.DelayTimer > 0) return false;
+            if(force == false) {
+                if(status.IsPaused || status.DelayTimer > 0) return false;
+            }
             
             status.TypingStatuses[characterInfoIndex].State = CharacterTypingState.Typed;
+            effector.TypeWriterSettings[effector.GetTypeWriterIndex(this)].OnCharacterTyped?.Invoke(characterInfoIndex);
             if(ignoreTypingEvent == false) ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming.AfterTyping, effector, typeWriterIndex, characterInfoIndex);
             VisualizeCharacterIfNeed(effector, characterInfoIndex);
             
