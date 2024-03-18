@@ -144,14 +144,14 @@ namespace TextMeshProEffector {
                         else if(typeWriterSetting.StartTypingAuto == AutoStartTypingType.OnOtherTypeWriterStartedTyping) {
                             TMPE_TypeWriterBase targetTypeWriter = _typeWriterSettings[typeWriterSetting.TargetTypeWriterIndex].TypeWriter;
                             if(targetTypeWriter != null) {
-                                if(targetTypeWriter.GetElapsedTime(this) > typeWriterSetting.DelayFromTargetTypeWriterStartedTyping) {
+                                if(targetTypeWriter.GetElapsedTimeForTyping(this) > typeWriterSetting.DelayFromTargetTypeWriterStartedTyping) {
                                     typeWriterSetting.TypeWriter.StartTyping(this);
                                 }
                             }
                         }
                     }
                     else {
-                        if(typeWriterSetting.Repeat && typeWriterSetting.RepeatInterval > 0 && typeWriterSetting.TypeWriter.GetElapsedTime(this) > typeWriterSetting.RepeatInterval) {
+                        if(typeWriterSetting.Repeat && typeWriterSetting.RepeatInterval > 0 && typeWriterSetting.TypeWriter.GetElapsedTimeForTyping(this) > typeWriterSetting.RepeatInterval) {
                             typeWriterSetting.TypeWriter.OnTextChanged(this);
                             typeWriterSetting.TypeWriter.StartTyping(this);
                         }
@@ -374,7 +374,7 @@ namespace TextMeshProEffector {
             }
         }
         public void StartTyping(int typeWriterIndex) {
-            _typeWriterSettings[typeWriterIndex].TypeWriter?.StartTyping(this);
+            _typeWriterSettings[typeWriterIndex].TypeWriter.StartTyping(this);
         }
 
         public void PauseTyping() {
@@ -383,7 +383,7 @@ namespace TextMeshProEffector {
             }
         }
         public void PauseTyping(int typeWriterIndex) {
-            _typeWriterSettings[typeWriterIndex].TypeWriter?.PauseTyping(this);
+            _typeWriterSettings[typeWriterIndex].TypeWriter.PauseTyping(this);
         }
 
         public void DelayTyping(float seconds) {
@@ -392,7 +392,7 @@ namespace TextMeshProEffector {
             }
         }
         public void DelayTyping(float seconds, int typeWriterIndex) {
-            _typeWriterSettings[typeWriterIndex].TypeWriter?.DelayTyping(this, seconds);
+            _typeWriterSettings[typeWriterIndex].TypeWriter.DelayTyping(this, seconds);
         }
 
         public void ResumeTyping() {
@@ -401,7 +401,7 @@ namespace TextMeshProEffector {
             }
         }
         public void ResumeTyping(int typeWriterIndex) {
-            _typeWriterSettings[typeWriterIndex].TypeWriter?.ResumeTyping(this);
+            _typeWriterSettings[typeWriterIndex].TypeWriter.ResumeTyping(this);
         }
 
         public bool IsPausedTyping(int typeWriterIndex) {
@@ -417,13 +417,31 @@ namespace TextMeshProEffector {
             }
         }
 
+        public void SetTypeWriterSpeed(float speed) {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.SetTypeWriterSpeed(this, speed);
+            }
+        }
+        public void SetTypeWriterSpeed(int typeWriterIndex, int speed) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter.SetTypeWriterSpeed(this, speed);
+        }
+
         public void SetTypingSpeed(float speed) {
             foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
                 typeWriterSetting.TypeWriter?.SetTypingSpeed(this, speed);
             }
         }
         public void SetTypingSpeed(int typeWriterIndex, int speed) {
-            _typeWriterSettings[typeWriterIndex].TypeWriter?.SetTypingSpeed(this, speed);
+            _typeWriterSettings[typeWriterIndex].TypeWriter.SetTypingSpeed(this, speed);
+        }
+
+        public void SetTypingEffectSpeed(float speed) {
+            foreach(TMPE_TypeWriterSetting typeWriterSetting in _typeWriterSettings) {
+                typeWriterSetting.TypeWriter?.SetTypingEffectSpeed(this, speed);
+            }
+        }
+        public void SetTypingEffectSpeed(int typeWriterIndex, int speed) {
+            _typeWriterSettings[typeWriterIndex].TypeWriter.SetTypingEffectSpeed(this, speed);
         }
 
         public bool IsStartedTyping(int typeWriterIndex) {

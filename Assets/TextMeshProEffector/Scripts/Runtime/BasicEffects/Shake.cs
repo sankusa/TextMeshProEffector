@@ -4,15 +4,10 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.BasicEffects {
+    [CreateAssetMenu(fileName = nameof(Shake), menuName = nameof(TextMeshProEffector) + "/" + nameof(BasicEffects) + "/" + nameof(Shake))]
     public class Shake : TMPE_BasicEffect {
         [SerializeField] private float _amplitude = 1;
         [SerializeField, Min(0)] private float _interval = 0;
-        [SerializeField] private float _timeGapByChar;
-
-        static string GetToolTip() {
-return
-@"a : amplitude";
-        }
 
         public override bool ValidateTag(TMPE_Tag tag) {
             if(tag.Value != null) return false;
@@ -62,6 +57,11 @@ return
             currentVertices[vertexIndex + 1].y = currentVertices[vertexIndex + 1].y + randomY;
             currentVertices[vertexIndex + 2].y = currentVertices[vertexIndex + 2].y + randomY;
             currentVertices[vertexIndex + 3].y = currentVertices[vertexIndex + 3].y + randomY;
+        }
+
+        public override string GetToolTip() {
+return
+@"a : amplitude";
         }
     }
 }

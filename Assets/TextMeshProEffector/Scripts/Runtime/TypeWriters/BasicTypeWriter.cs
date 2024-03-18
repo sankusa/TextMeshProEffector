@@ -44,7 +44,7 @@ namespace TextMeshProEffector.TypeWriters {
                 if(tag.Name == "time") {
                     float time = float.Parse(tag.Value);
                     for(int j = tag.StartIndex; j <= tag.EndIndex; j++) {
-                        status.TypingStatuses[j].FixedTypeTiming = time;
+                        status.CharacterTypingStatuses[j].FixedTypeTiming = time;
                     }
                 }
             }
@@ -55,8 +55,8 @@ namespace TextMeshProEffector.TypeWriters {
             BasicTypeWriterStatus status = _statusDic[effector];
 
             for(int i = 0; i < textInfo.characterCount; i++) {
-                var charStatus = status.TypingStatuses[i];
-                if(charStatus.State == CharacterTypingState.Idle && charStatus.FixedTypeTiming >= 0 && status.ElapsedTime >= charStatus.FixedTypeTiming) {
+                var charStatus = status.CharacterTypingStatuses[i];
+                if(charStatus.State == CharacterTypingState.Idle && charStatus.FixedTypeTiming >= 0 && status.ElapsedTimeForTyping >= charStatus.FixedTypeTiming) {
                     TryType(effector, i); 
                 }
             }
@@ -67,7 +67,7 @@ namespace TextMeshProEffector.TypeWriters {
                 characterNumShouldBeTyped = textInfo.characterCount;
             }
             else {
-                characterNumShouldBeTyped = Mathf.Min(Mathf.CeilToInt(status.ElapsedTime / _intervalPerChar), textInfo.characterCount);
+                characterNumShouldBeTyped = Mathf.Min(Mathf.CeilToInt(status.ElapsedTimeForTyping / _intervalPerChar), textInfo.characterCount);
             }
 
             int typeNum = characterNumShouldBeTyped - status.TypedCharacterCount;
@@ -75,7 +75,7 @@ namespace TextMeshProEffector.TypeWriters {
                 int typeStartIndex = status.TypedCharacterCount;
                 int typeEndIndex = characterNumShouldBeTyped - 1;
                 for(int i = typeStartIndex; i <= typeEndIndex; i++) {
-                    if(status.TypingStatuses[i].FixedTypeTiming < 0) {
+                    if(status.CharacterTypingStatuses[i].FixedTypeTiming < 0) {
                         if(TryType(effector, i) == false) break;
                     }
 

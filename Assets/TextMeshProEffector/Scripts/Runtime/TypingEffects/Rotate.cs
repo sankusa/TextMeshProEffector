@@ -4,13 +4,14 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEffects {
+    [CreateAssetMenu(fileName = nameof(Rotate), menuName = nameof(TextMeshProEffector) + "/" + nameof(TypingEffects) + "/" + nameof(Rotate))]
     public class Rotate : TMPE_TypingEffect {
         [SerializeField, Min(0)] private float _delay;
         [SerializeField, Min(0)] private float _duration;
         [SerializeField] private Vector3 _from;
         [SerializeField] private Vector3 _to;
         [SerializeField] private Vector3 _pivot;
-        [SerializeField] private AnimationCurve _curve = new AnimationCurve();
+        [SerializeField] private AnimationCurve _progressCurve = new AnimationCurve();
 
         protected override bool UpdateVertexByCharacter(TMPE_Tag tag, TMPE_EffectorBase effector, int charInfoIndex, float elapsedTime) {
             TMP_TextInfo textInfo = effector.TextInfo;
@@ -20,7 +21,7 @@ namespace TextMeshProEffector.TypingEffects {
 
             float elapsed = elapsedTime;
             float progress = _duration == 0 ? 1 : Mathf.Clamp01((elapsedTime - _delay) / _duration);
-            float curveValue = _curve.Evaluate(progress);
+            float curveValue = _progressCurve.Evaluate(progress);
             Vector3 rotation = Vector3.Lerp(_from, _to, curveValue);
 
             int materialIndex = charInfo.materialReferenceIndex;

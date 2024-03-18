@@ -34,7 +34,7 @@ namespace TextMeshProEffector {
             TMP_TextInfo textInfo = effector.TextInfo;
             RandomTypeWriterStatus status = _statusDic[effector];
 
-            status.Timer += Time.deltaTime * status.TypeSpeed;
+            status.Timer += Time.deltaTime * status.TypingSpeed;
 
             if(textInfo.characterCount == 0) return;
 
@@ -47,14 +47,14 @@ namespace TextMeshProEffector {
                 status.NextTypeInterval = Mathf.Max(_intervalPerChar + (2f * Random.value - 1) * _intervalPerCharRandomness, 0);
                 int notTypedNum = 0;
                 for(int i = 0; i < textInfo.characterCount; i++) {
-                    if(status.TypingStatuses[i].State == CharacterTypingState.Idle) notTypedNum++;
+                    if(status.CharacterTypingStatuses[i].State == CharacterTypingState.Idle) notTypedNum++;
                 }
                 if(notTypedNum == 0) break;
                 
                 int targetNotTypedNum = (int)(Random.value * notTypedNum);
                 int notTypedCounter = 0;
                 for(int i = 0; i < textInfo.characterCount; i++) {
-                    if(status.TypingStatuses[i].State == CharacterTypingState.Idle) {
+                    if(status.CharacterTypingStatuses[i].State == CharacterTypingState.Idle) {
                         if(notTypedCounter == targetNotTypedNum) {
                             status.NextTypeIndex = i;
                             break;

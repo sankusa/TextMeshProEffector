@@ -9,9 +9,11 @@ using UnityEngine;
 namespace TextMeshProEffector {
     [CustomEditor(typeof(TMPE_EffectContainer))]
     public class TMPE_EffectContainerInspector : Editor {
+        private static GUIStyle _groupBoxSkin;
+        private static GUIStyle GroupBoxSkin => _groupBoxSkin ??= new GUIStyle("GroupBox") {margin = new RectOffset()};
+
         private ReorderableList _basicEffectList;
-        // private ReorderableList _typingEffectList;
-        // private ReorderableList _typingEventEffectList;
+        private Editor _effectInspector;
 
         public override void OnInspectorGUI() {
             serializedObject.Update();
@@ -26,81 +28,50 @@ namespace TextMeshProEffector {
                     EditorGUI.LabelField(rect, "Basic Effects");
                 };
                 _basicEffectList.drawElementCallback = (rect, index, isActive, isFocused) => {
-                    EditorGUI.PropertyField(rect, basicEffectsProp.GetArrayElementAtIndex(index), true);
+                    SerializedProperty effectProp = basicEffectsProp.GetArrayElementAtIndex(index);
+                    TMPE_EffectBase effect = effectProp.objectReferenceValue as TMPE_EffectBase;
+                    Rect fieldRect = new Rect(rect) {width = effect == null ? rect.width : rect.width - 60, height = EditorGUIUtility.singleLineHeight};
+                    EditorGUI.PropertyField(fieldRect, effectProp, new GUIContent(effect == null ? "Null" : effect.GetCaption()));
+
+                    if(effect != null) {
+                        if(GUI.Button(new Rect(rect) {xMin = rect.xMax - 58, height = EditorGUIUtility.singleLineHeight}, "Open")) {
+                            _effectInspector = CreateEditor(effect);
+                        }
+                    }
                 };
                 _basicEffectList.elementHeightCallback = index => {
                     return EditorGUI.GetPropertyHeight(basicEffectsProp.GetArrayElementAtIndex(index), true);
                 };
-                _basicEffectList.onAddDropdownCallback = (rect, list) => {
-                    GenericMenu addMenu = new GenericMenu();
-                    foreach(Type effectType in TypeCache.GetTypesDerivedFrom<TMPE_BasicEffect>().Where(x => x.IsAbstract == false)) {
-                        addMenu.AddItem(new GUIContent(effectType.Name), false, () => {
-                            Undo.RecordObject(effectContainer, "Add Effect");
-                            TMPE_BasicEffect effect = Activator.CreateInstance(effectType) as TMPE_BasicEffect;
-                            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(effect), effect);
-                            effectContainer.BasicEffects.Add(effect);
-                        });
-                    }
-                    addMenu.ShowAsContext();
-                };
             }
-            _basicEffectList.DoLayoutList();
 
-            // // TypingEffects
-            // SerializedProperty typingEffectsProp = serializedObject.FindProperty("_typingEffects");
-            // if(_typingEffectList == null) {
-            //     _typingEffectList = new ReorderableList(serializedObject, typingEffectsProp);
-            //     _typingEffectList.drawHeaderCallback = rect => {
-            //         EditorGUI.LabelField(rect, "Typing Effects");
-            //     };
-            //     _typingEffectList.drawElementCallback = (rect, index, isActive, isFocused) => {
-            //         EditorGUI.PropertyField(rect, typingEffectsProp.GetArrayElementAtIndex(index), true);
-            //     };
-            //     _typingEffectList.elementHeightCallback = index => {
-            //         return EditorGUI.GetPropertyHeight(typingEffectsProp.GetArrayElementAtIndex(index), true);
-            //     };
-            //     _typingEffectList.onAddDropdownCallback = (rect, list) => {
-            //         GenericMenu addMenu = new GenericMenu();
-            //         foreach(Type effectType in TypeCache.GetTypesDerivedFrom<TMPE_TypingEffect>().Where(x => x.IsAbstract == false)) {
-            //             addMenu.AddItem(new GUIContent(effectType.Name), false, () => {
-            //                 Undo.RecordObject(effectContainer, "Add Effect");
-            //                 TMPE_TypingEffect effect = Activator.CreateInstance(effectType) as TMPE_TypingEffect;
-            //                 JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(effect), effect);
-            //                 effectContainer.TypingEffects.Add(effect);
-            //             });
-            //         }
-            //         addMenu.ShowAsContext();
-            //     };
-            // }
-            // _typingEffectList.DoLayoutList();
+            if(_effectInspector == null) {
+                _basicEffectList.DoLayoutList();
+            }
+            else {
+                if(GUILayout.Button("Close")) {
+                    _effectInspector = null;
+                }
+                else {
+                    using var _ = new BackgroundColorScope(new Color(0.92f, 0.9f, 1f));
+                    using (new EditorGUILayout.VerticalScope(GroupBoxSkin, GUILayout.ExpandWidth(true))) {
+                        // using(new EditorGUILayout.HorizontalScope()) {
+                        //     // EditorGUILayout.LabelField(EditorGUIUtility.IconContent("d_ScriptableObject Icon"), GUILayout.Width(20));
+                        //     // EditorGUILayout.LabelField($"{_effectInspector.target.name}({_effectInspector.target.GetType().Name})");
 
-            // // TypingEventEffects
-            // SerializedProperty typingEventEffectsProp = serializedObject.FindProperty("_typingEventEffects");
-            // if(_typingEventEffectList == null) {
-            //     _typingEventEffectList = new ReorderableList(serializedObject, typingEventEffectsProp);
-            //     _typingEventEffectList.drawHeaderCallback = rect => {
-            //         EditorGUI.LabelField(rect, "Typing Event Effects");
-            //     };
-            //     _typingEventEffectList.drawElementCallback = (rect, index, isActive, isFocused) => {
-            //         EditorGUI.PropertyField(rect, typingEventEffectsProp.GetArrayElementAtIndex(index), true);
-            //     };
-            //     _typingEventEffectList.elementHeightCallback = index => {
-            //         return EditorGUI.GetPropertyHeight(typingEventEffectsProp.GetArrayElementAtIndex(index), true);
-            //     };
-            //     _typingEventEffectList.onAddDropdownCallback = (rect, list) => {
-            //         GenericMenu addMenu = new GenericMenu();
-            //         foreach(Type effectType in TypeCache.GetTypesDerivedFrom<TMPE_TypingEventEffect>().Where(x => x.IsAbstract == false)) {
-            //             addMenu.AddItem(new GUIContent(effectType.Name), false, () => {
-            //                 Undo.RecordObject(effectContainer, "Add Effect");
-            //                 TMPE_TypingEventEffect effect = Activator.CreateInstance(effectType) as TMPE_TypingEventEffect;
-            //                 JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(effect), effect);
-            //                 effectContainer.TypingEventEffects.Add(effect);
-            //             });
-            //         }
-            //         addMenu.ShowAsContext();
-            //     };
-            // }
-            // _typingEventEffectList.DoLayoutList();
+                        // }
+                        TMPE_EffectBase effect = _effectInspector.target as TMPE_EffectBase;
+                        
+                        EditorGUI.BeginDisabledGroup(true);
+                        EditorGUILayout.ObjectField(effect, typeof(TMPE_EffectBase), false);
+                        EditorGUI.EndDisabledGroup();
+                        EditorGUILayout.LabelField(effect.GetCaption());
+
+                        using (new EditorGUILayout.VerticalScope(GroupBoxSkin, GUILayout.ExpandWidth(true))) {
+                            _effectInspector.OnInspectorGUI();
+                        }
+                    }
+                }
+            }
 
             serializedObject.ApplyModifiedProperties();
         }

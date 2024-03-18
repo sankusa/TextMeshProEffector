@@ -14,7 +14,7 @@ namespace TextMeshProEffector {
                 TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
                 if(tag == null || (tag.StartIndex <= charInfo.index && charInfo.index <= tag.EndIndex)) {
                     if(effector.TypingInfo[i].Visiblity == CharacterVisiblity.Visible && typeWriter.IsTypedCharacter(effector, i)) {
-                        isPlaying |= UpdateVertexByCharacter(tag, effector, i, typeWriter.GetElapsedTimeFromTypedByCharacter(effector, i));
+                        isPlaying |= UpdateVertexByCharacter(tag, effector, i, typeWriter.GetElapsedTimeForTypingEffect(effector, i));
                     }
                 }
             }
@@ -22,5 +22,7 @@ namespace TextMeshProEffector {
         }
 
         protected virtual bool UpdateVertexByCharacter(TMPE_Tag tag, TMPE_EffectorBase effector, int charInfoIndex, float elapsedTime) => false;
+
+        public override string GetCaption() => string.IsNullOrEmpty(_tagName) ? $"{name} -------- All Characters" : $"{name} -------- <+{_tagName}>";
     }
 }

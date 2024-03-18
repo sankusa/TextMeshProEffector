@@ -69,8 +69,6 @@ namespace TextMeshProEffector {
             }
 
             EditorGUILayout.PropertyField(defaultCharacterVisiblityProp);
-
-            EditorGUILayout.Space(12);
             
             // _typeWriterSettingList.DoLayoutList();
             using (new EditorGUILayout.HorizontalScope()) {
@@ -80,17 +78,37 @@ namespace TextMeshProEffector {
                     effector.TypeWriterSettings.Add(new TMPE_TypeWriterSetting());
                 }
             }
-            //using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
-                for(int i = 0; i < typeWriterSettingsProp.arraySize; i++) {
-                    using (new EditorGUILayout.HorizontalScope()) {
-                        EditorGUILayout.Space(20, false);
-                        using var _ = new BackgroundColorScope(new Color(0.8f, 0.8f, 0.8f, 1f));
-                        using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
-                            using var __ = new BackgroundColorScope(Color.white);
 
-                            SerializedProperty typeWriterSettingProp = typeWriterSettingsProp.GetArrayElementAtIndex(i);
-                            SerializedProperty typeWriterProp = typeWriterSettingProp.FindPropertyRelative("_typeWriter");
-                            var typeWriter = typeWriterProp.objectReferenceValue;
+            for(int i = 0; i < typeWriterSettingsProp.arraySize; i++) {
+                if(i == _typeWriterEditors.Count) _typeWriterEditors.Add(null);
+
+                using (new EditorGUILayout.HorizontalScope()) {
+                    // EditorGUILayout.Space(20, false);
+                    using var _ = new BackgroundColorScope(new Color(0.8f, 0.8f, 0.8f, 1f));
+                    using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
+                        using var __ = new BackgroundColorScope(Color.white);
+
+                        SerializedProperty typeWriterSettingProp = typeWriterSettingsProp.GetArrayElementAtIndex(i);
+                        SerializedProperty typeWriterProp = typeWriterSettingProp.FindPropertyRelative("_typeWriter");
+                        var typeWriter = typeWriterProp.objectReferenceValue;
+
+                        
+                        if(_typeWriterEditors[i] != null) {
+                            if(GUILayout.Button("Close")) {
+                                _typeWriterEditors[i] = null;
+                                continue;
+                            }
+
+                            EditorGUI.BeginDisabledGroup(true);
+                            EditorGUILayout.ObjectField(typeWriterProp, GUIContent.none);
+                            EditorGUI.EndDisabledGroup();
+
+                            using var ___ = new BackgroundColorScope(new Color(0.9f, 1f, 1f));
+                            using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
+                                _typeWriterEditors[i].OnInspectorGUI();
+                            }
+                        }
+                        else {
                             using (new EditorGUILayout.HorizontalScope(GUI.skin.box)) {
                                 using (new LabelWidthScope(40)) {
                                     EditorGUILayout.LabelField(i.ToString());
@@ -109,21 +127,6 @@ namespace TextMeshProEffector {
                                     }
                                 }
 
-                                if(typeWriterProp.objectReferenceValue != null) {
-                                    if(typeWriterProp.isExpanded) {
-                                        if(GUILayout.Button("Hide TypeWriter Inspector")) {
-                                            typeWriterProp.isExpanded = false;
-                                            continue;
-                                        }
-                                    }
-                                    else {
-                                        if(GUILayout.Button("Show TypeWriter Inspector")) {
-                                            typeWriterProp.isExpanded = true;
-                                            continue;
-                                        }
-                                    }
-                                }
-
                                 if(GUILayout.Button("Remove")) {
                                     typeWriterSettingsProp.DeleteArrayElementAtIndex(i);
                                     continue;
@@ -131,49 +134,21 @@ namespace TextMeshProEffector {
                             }
 
                             if(typeWriterSettingProp.isExpanded) {
-                                if(typeWriterProp.isExpanded && typeWriterProp.objectReferenceValue) {
-                                    if(typeWriterProp.objectReferenceValue != typeWriter) {
-                                        _typeWriterEditors[i] = null;
-                                    }
-                                    if(i == _typeWriterEditors.Count) {
-                                        _typeWriterEditors.Add(null);
-                                    }
-                                    if(typeWriterProp.objectReferenceValue != null) {
-                                        if(_typeWriterEditors[i] == null) _typeWriterEditors[i] = CreateEditor(typeWriterProp.objectReferenceValue);
-                                        // if(typeWriterProp.isExpanded) {
-                                        //     if(GUILayout.Button("Hide TypeWriter Inspector")) {
-                                        //         typeWriterProp.isExpanded = false;
-                                        //     }
-                                        // }
-                                        // else {
-                                        //     if(GUILayout.Button("Open TypeWriter Inspector")) {
-                                        //         typeWriterProp.isExpanded = true;
-                                        //     }
-                                        // }
-
-                                        if(typeWriterProp.isExpanded) {
-                                            EditorGUI.BeginDisabledGroup(true);
-                                            EditorGUILayout.PropertyField(typeWriterProp);
-                                            EditorGUI.EndDisabledGroup();
-                                            EditorGUILayout.LabelField("TypeWriter Inspector", EditorStyles.boldLabel);
-
-                                            using var ___ = new BackgroundColorScope(new Color(0.92f, 0.9f, 1f));
-                                            using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
-                                                _typeWriterEditors[i].OnInspectorGUI();
-                                            }
-                                        }
+                                if(typeWriterProp.objectReferenceValue != null) {
+                                    if(GUILayout.Button("Open TypeWriter Inspector")) {
+                                        _typeWriterEditors[i] = CreateEditor(typeWriterProp.objectReferenceValue);
+                                        continue;
                                     }
                                 }
-                                else {
-                                    EditorGUILayout.PropertyField(typeWriterSettingProp);
-                                }
+                                EditorGUILayout.PropertyField(typeWriterSettingProp);
                             }
                         }
                     }
+                    
                 }
-            //}
+            }
 
-            EditorGUILayout.Space(12);
+            EditorGUILayout.Space(4);
 
             // エフェクトコンテナ
             EditorGUI.BeginChangeCheck();
@@ -186,7 +161,6 @@ namespace TextMeshProEffector {
             }
             if(_effectContainerEditor != null) {
                 using (new EditorGUILayout.HorizontalScope()) {
-                    EditorGUILayout.Space(20, false);
                     using var _ = new BackgroundColorScope(new Color(0.8f, 0.8f, 0.8f, 1f));
                     using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
                         using var __ = new BackgroundColorScope(Color.white);
@@ -208,71 +182,10 @@ namespace TextMeshProEffector {
                 }
             }
 
+            EditorGUILayout.Space(4);
+
             SerializedProperty onTypingCompletedProp = serializedObject.FindProperty("_onTypingCompleted");
             EditorGUILayout.PropertyField(onTypingCompletedProp);
-
-            // タイプライターのインスペクタを表示
-            // using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
-            //     if(typeWriterSettingsProp.arraySize > 0) {
-            //         if(_typeWriterInspectorOpened) {
-            //             if(GUILayout.Button("Hide TypeWriter Inspector")) {
-            //                 _typeWriterInspectorOpened = false;
-            //             }
-            //         }
-            //         else {
-            //             if(GUILayout.Button("Open TypeWriter Inspector")) {
-            //                 _typeWriterInspectorOpened = true;
-            //             }
-            //         }
-
-            //         if(_typeWriterInspectorOpened) {
-            //             int[] typeWriterSettingIndexSelections = Enumerable.Range(0, typeWriterSettingsProp.arraySize).ToArray();
-
-            //             if(_inspectorShowingTypeWriterSettingIndex >= typeWriterSettingsProp.arraySize) _inspectorShowingTypeWriterSettingIndex = -1;
-
-            //             _inspectorShowingTypeWriterSettingIndex = EditorGUILayout.IntPopup(
-            //                 "Index",
-            //                 _inspectorShowingTypeWriterSettingIndex,
-            //                 typeWriterSettingIndexSelections.Select(x => x.ToString()).ToArray(),
-            //                 typeWriterSettingIndexSelections
-            //             );
-
-            //             if(_inspectorShowingTypeWriterSettingIndex >= 0) {
-            //                 SerializedProperty typeWriterProp = typeWriterSettingsProp.GetArrayElementAtIndex(_inspectorShowingTypeWriterSettingIndex)
-            //                     .FindPropertyRelative("_typeWriter");
-
-            //                 EditorGUI.BeginDisabledGroup(true);
-            //                 EditorGUILayout.PropertyField(typeWriterProp);
-            //                 EditorGUI.EndDisabledGroup();
-
-            //                 // 別のタイプライターが指定されたらインスペクタを作成し直す
-            //                 if(typeWriterProp.objectReferenceValue != _editingTypeWriter) {
-            //                     _editingTypeWriter = typeWriterProp.objectReferenceValue as TMPE_TypeWriterBase;
-            //                     if(_editingTypeWriter == null) {
-            //                         _typeWriterEditor = null;
-            //                     }
-            //                     else {
-            //                         _typeWriterEditor = CreateEditor(_editingTypeWriter);
-            //                     }
-            //                 }
-
-            //                 if(_typeWriterEditor != null) {
-            //                     using var _ = new EditorGUILayout.VerticalScope(GroupBoxSkin);
-            //                     _typeWriterEditor.OnInspectorGUI();
-            //                 }
-            //             }
-            //         }
-            //             // EditorGUI.BeginChangeCheck();
-            //             // Object newTypeWriter = EditorGUILayout.ObjectField("Type Writer", typeWriterProp.objectReferenceValue, typeof(TMPE_TypeWriterBase), false);
-            //             // if(EditorGUI.EndChangeCheck()) {
-            //             //     if(newTypeWriter != typeWriterProp.objectReferenceValue) {
-            //             //         Undo.RecordObject(effector, "TypeWriter Changed");
-            //             //         effector.SetTypeWriter(newTypeWriter as TMPE_TypeWriterBase);
-            //             //         _typeWriterEditor = null;
-            //             //     }
-            //             // }
-            //     }
-            // }
 
             serializedObject.ApplyModifiedProperties();
         }

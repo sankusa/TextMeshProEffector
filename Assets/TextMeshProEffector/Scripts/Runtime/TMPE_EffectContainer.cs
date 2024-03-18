@@ -13,6 +13,7 @@ namespace TextMeshProEffector {
         public void UpdateTextInfo_BasicEffect(TMPE_EffectorBase effector) {
             List<TMPE_Tag> tags = effector.TagContainer.BasicTags;
             foreach(TMPE_BasicEffect basicEffect in _basicEffects) {
+                if(basicEffect == null) continue;
                 if(string.IsNullOrEmpty(basicEffect.TagName)) {
                     basicEffect.UpdateVertex(null, effector);
                 }
@@ -20,6 +21,7 @@ namespace TextMeshProEffector {
 
             foreach(TMPE_Tag tag in tags) {
                 foreach(TMPE_BasicEffect basicEffect in _basicEffects) {
+                    if(basicEffect == null) continue;
                     if(basicEffect.TagName == tag.Name) {
                         basicEffect.UpdateVertex(tag, effector);
                     }
@@ -29,6 +31,7 @@ namespace TextMeshProEffector {
 
         public bool IsValidBasicTag(TMPE_Tag tag) {
             foreach(TMPE_BasicEffect basicEffect in _basicEffects) {
+                if(basicEffect == null) continue;
                 if(basicEffect.TagName == tag.Name && basicEffect.ValidateTag(tag)) {
                     return true;
                 }
