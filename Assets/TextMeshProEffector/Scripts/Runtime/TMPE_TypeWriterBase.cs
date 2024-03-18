@@ -181,7 +181,6 @@ namespace TextMeshProEffector {
     }
 
     public abstract class TMPE_TypeWriterBase : ScriptableObject {
-        [SerializeField] protected bool _visualizeCharacters = true;
         [SerializeReference] protected List<TMPE_TypingEffect> _typingEffects;
         public List<TMPE_TypingEffect> TypingEffects => _typingEffects;
 
@@ -253,7 +252,7 @@ namespace TextMeshProEffector {
         }
 
         protected void VisualizeCharacterIfNeed(TMPE_EffectorBase effector, int characterinfoIndex) {
-            if(_visualizeCharacters) effector.TypingInfo[characterinfoIndex].Visiblity = CharacterVisiblity.Visible;
+            if(effector.TypeWriterSettings[effector.GetTypeWriterIndex(this)].VisualizeCharacters) effector.TypingInfo[characterinfoIndex].Visiblity = CharacterVisiblity.Visible;
         }
 
         public abstract void StartTyping(TMPE_EffectorBase effector);

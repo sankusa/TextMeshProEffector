@@ -16,6 +16,9 @@ namespace TextMeshProEffector {
         [SerializeField] private TMPE_TypeWriterBase _typeWriter;
         public TMPE_TypeWriterBase TypeWriter => _typeWriter;
 
+        [SerializeField] private bool _visualizeCharacters = true;
+        public bool VisualizeCharacters => _visualizeCharacters;
+
         [SerializeField] private AutoStartTypingType _startTypingAuto = AutoStartTypingType.Auto;
         public AutoStartTypingType StartTypingAuto => _startTypingAuto;
 

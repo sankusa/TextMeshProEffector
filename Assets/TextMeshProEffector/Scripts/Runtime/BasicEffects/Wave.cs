@@ -4,7 +4,7 @@ using TextMeshProEffector;
 using TMPro;
 using UnityEngine;
 
-namespace Kodama.TextMeshProEffector {
+namespace TextMeshProEffector.BasicEffects {
     public class Wave : TMPE_BasicEffect {
         [SerializeField] private float _amplitude = 1;
         [SerializeField] private float _delay = 0.5f;

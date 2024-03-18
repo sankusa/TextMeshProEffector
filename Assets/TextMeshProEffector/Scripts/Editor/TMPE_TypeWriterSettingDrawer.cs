@@ -10,9 +10,12 @@ namespace TextMeshProEffector {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             TMPE_EffectorBase effector = property.serializedObject.targetObject as TMPE_EffectorBase;
             SerializedProperty typeWriterProp = property.FindPropertyRelative("_typeWriter");
+            SerializedProperty visualizeCharactersProp = property.FindPropertyRelative("_visualizeCharacters");
             SerializedProperty startTypingAutoProp = property.FindPropertyRelative("_startTypingAuto");
 
             Rect typeWriterRect = new Rect(position) {height = EditorGUIUtility.singleLineHeight};
+            position.yMin += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            Rect visualizeCharactersRect = new Rect(position) {height = EditorGUIUtility.singleLineHeight};
             position.yMin += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             Rect startTypingAutoRect = new Rect(position) {height = EditorGUIUtility.singleLineHeight};
             position.yMin += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
@@ -43,6 +46,7 @@ namespace TextMeshProEffector {
             }
 
             EditorGUI.PropertyField(startTypingAutoRect, startTypingAutoProp);
+            EditorGUI.PropertyField(visualizeCharactersRect, visualizeCharactersProp);
 
             if(startTypingAutoProp.enumValueIndex == (int)AutoStartTypingType.OnOtherTypeWriterStartedTyping) {
                 SerializedProperty targetTypeWriterIndexProp = property.FindPropertyRelative("_targetTypeWriterIndex");
@@ -90,7 +94,7 @@ namespace TextMeshProEffector {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             SerializedProperty startTypingAutoProp = property.FindPropertyRelative("_startTypingAuto");
 
-            float height = EditorGUIUtility.singleLineHeight * 3 + EditorGUIUtility.standardVerticalSpacing * 2;
+            float height = EditorGUIUtility.singleLineHeight * 4 + EditorGUIUtility.standardVerticalSpacing * 3;
             if(startTypingAutoProp.enumValueIndex == (int)AutoStartTypingType.OnOtherTypeWriterStartedTyping) {
                 height += (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2;
             }
