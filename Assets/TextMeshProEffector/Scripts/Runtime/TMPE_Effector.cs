@@ -120,8 +120,8 @@ namespace TextMeshProEffector {
 #else
                         // 加工+タグ情報オブジェクト生成
                         _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
-                        _textPreprocessor.ProcessText(_effectContainer, _tagContainer);
-                        _tmpText.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
+                        _textPreprocessor.ProcessText(this);
+                        _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
 #endif
                     }
                     // テキスト変更時共通処理
