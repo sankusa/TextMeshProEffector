@@ -29,14 +29,14 @@ namespace TextMeshProEffector {
         public static bool ForceUpdateInEditing {
             get {
                 if(_forceUpdateInEditingIsUsed == false) {
-                    _forceUpdateInEditing = SessionState.GetBool(_forceUpdateInEditingSessionStateKey, false);
+                    _forceUpdateInEditing = EditorPrefs.GetBool(_forceUpdateInEditingSessionStateKey, false);
                     _forceUpdateInEditingIsUsed = true;
                 }
                 return _forceUpdateInEditing;
             }
             set {
                 _forceUpdateInEditing = value;
-                SessionState.SetBool(_forceUpdateInEditingSessionStateKey, value);
+                EditorPrefs.SetBool(_forceUpdateInEditingSessionStateKey, value);
             }
         }
 #endif
