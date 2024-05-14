@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.BasicEffects {
-    [CreateAssetMenu(fileName = nameof(Shake), menuName = nameof(TextMeshProEffector) + "/" + nameof(BasicEffects) + "/" + nameof(Shake))]
     public class Shake : TMPE_BasicEffect {
         [SerializeField] private float _amplitude = 1;
         [SerializeField, Min(0)] private float _interval = 0;

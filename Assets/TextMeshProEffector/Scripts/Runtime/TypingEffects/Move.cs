@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEffects {
-    [CreateAssetMenu(fileName = nameof(Move), menuName = nameof(TextMeshProEffector) + "/" + nameof(TypingEffects) + "/" + nameof(Move))]
     public class Move : TMPE_TypingEffect {
         [SerializeField, Min(0)] private float _delay;
         [SerializeField, Min(0)] private float _duration;

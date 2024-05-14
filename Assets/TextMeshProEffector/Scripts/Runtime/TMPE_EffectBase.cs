@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TextMeshProEffector {
     [Serializable]
-    public abstract class TMPE_EffectBase : ScriptableObject {
+    public abstract class TMPE_EffectBase {
         [SerializeField] protected string _tagName;
         public string TagName => _tagName;
 

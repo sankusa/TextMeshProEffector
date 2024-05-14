@@ -5,7 +5,6 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.BasicEffects {
-    [CreateAssetMenu(fileName = nameof(Wave), menuName = nameof(TextMeshProEffector) + "/" + nameof(BasicEffects) + "/" + nameof(Wave))]
     public class Wave : TMPE_BasicEffect {
         [SerializeField] private Vector3 _amplitude = Vector3.zero;
         [SerializeField] private Vector3 _duration = Vector3.zero;
@@ -14,19 +13,6 @@ namespace TextMeshProEffector.BasicEffects {
         [SerializeField] private AnimationCurve _progressCurveX = new AnimationCurve();
         [SerializeField] private AnimationCurve _progressCurveY = new AnimationCurve();
         [SerializeField] private AnimationCurve _progressCurveZ = new AnimationCurve();
-
-        // public override bool ValidateTag(TMPE_Tag tag) {
-        //     if(tag.Value != null) return false;
-        //     foreach(TMPE_TagAttribute attribute in tag.Attributes) {
-        //         if(attribute.Name == "a" || attribute.Name == "s" || attribute.Name == "d") {
-        //             if(float.TryParse(attribute.Value, out float _) == false) return false;
-        //         }
-        //         else {
-        //             return false;
-        //         }
-        //     }
-        //     return true;
-        // }
 
         protected override void UpdateVertexByCharacter(TMPE_Tag tag, TMPE_EffectorBase effector, int charInfoIndex) {
             TMP_TextInfo textInfo = effector.TextInfo;

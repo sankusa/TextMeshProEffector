@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace TextMeshProEffector {
     internal class TMPE_TextPreprocessorForEditor : ITextPreprocessor {
         private string _sourceTextCache;
         private string _processedTextCache;
-        private int _effectContainerInstanceIdOld;
+        private long _effectContainerInstanceIdTotalOld;
 
         private readonly TMPE_Effector _effector;
         private readonly TMPE_TextPreprocessor _textPreprocessor;
@@ -26,28 +27,23 @@ namespace TextMeshProEffector {
         // ※char[]を引数に取る系や数値を展開する系の関数でテキストを設定した場合は呼ばれないので注意
         string ITextPreprocessor.PreprocessText(string sourcetext) {
             // Debug.Log("ProcessText");
-            TMPE_EffectContainer effectContainer = _effector.EffectContainer;
+            List<TMPE_BasicEffectContainer> effectContainers = _effector.EffectContainers;
 
-            int effectContainerInstanceId = effectContainer == null ? 0 : effectContainer.GetInstanceID();
-            if(sourcetext == _sourceTextCache && effectContainerInstanceId == _effectContainerInstanceIdOld) {
+            long effectContainerInstanceIdTotal = effectContainers.Select(x => x == null ? 0 : (long)x.GetInstanceID()).Sum();
+            if(sourcetext == _sourceTextCache && effectContainerInstanceIdTotal == _effectContainerInstanceIdTotalOld) {
                 return _processedTextCache;
             }
 
             string processedText = null;
-            if(effectContainer == null) {
-                processedText = sourcetext;
-                _effector.TagContainer.Clear();
-            }
-            else {
-                // 有効なタグを文字列から切り取り、タグ情報オブジェクトを作成
-                _textPreprocessor.Source.Initialize(sourcetext);
-                _textPreprocessor.ProcessText(_effector);
-                processedText = _textPreprocessor.Destination.ToString();
-            }
+            // 有効なタグを文字列から切り取り、タグ情報オブジェクトを作成
+            _textPreprocessor.Source.Initialize(sourcetext);
+            _textPreprocessor.ProcessText(_effector);
+            processedText = _textPreprocessor.Destination.ToString();
+
             // キャッシュ
             _sourceTextCache = sourcetext;
             _processedTextCache = processedText;
-            _effectContainerInstanceIdOld = effectContainerInstanceId;
+            _effectContainerInstanceIdTotalOld = effectContainerInstanceIdTotal;
             return processedText;
         }
     }

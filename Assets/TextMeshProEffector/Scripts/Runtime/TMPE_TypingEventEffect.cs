@@ -13,8 +13,8 @@ namespace TextMeshProEffector {
         }
 
         public virtual TriggerTiming Timing => TriggerTiming.AfterTyping;
-        public virtual void OnEventTriggerd(TMPE_Tag tag, TMPE_EffectorBase effector, TMPE_TypeWriterBase typeWriter, int characterInfoIndex) {}
+        public virtual void OnEventTriggerd(TMPE_Tag tag, TMPE_EffectorBase effector, TMPE_TypingBehaviourBase typingBehaviour, int characterInfoIndex) {}
 
-        public override string GetCaption() => string.IsNullOrEmpty(_tagName) ? $"{name} -------- All Characters" : $"{name} -------- <!{_tagName}>";
+        public override string GetCaption() => string.IsNullOrEmpty(_tagName) ? "" : $"<!{_tagName}>";
     }
 }

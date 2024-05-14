@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEventEffects {
-    [CreateAssetMenu(fileName = nameof(SetTypeWriterSpeed), menuName = nameof(TextMeshProEffector) + "/" + nameof(TypingEventEffects) + "/" + nameof(SetTypeWriterSpeed))]
     public class SetTypeWriterSpeed : TMPE_TypingEventEffect {
         [SerializeField, Min(0)] private float _speed;
 
@@ -14,12 +13,12 @@ namespace TextMeshProEffector.TypingEventEffects {
             return true;
         }
 
-        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_EffectorBase effector, TMPE_TypeWriterBase typeWriter, int characterInfoIndex) {
+        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_EffectorBase effector, TMPE_TypingBehaviourBase typingBehaviour, int characterInfoIndex) {
             float speed = _speed;
             if(tag != null && string.IsNullOrEmpty(tag.Value) == false) {
                 speed = float.Parse(tag.Value);
             }
-            typeWriter.SetTypeWriterSpeed(effector, speed);
+            typingBehaviour.SetTypeWriterSpeed(effector, speed);
         }
     }
 }

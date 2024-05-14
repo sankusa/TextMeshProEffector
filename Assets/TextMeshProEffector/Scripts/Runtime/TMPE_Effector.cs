@@ -93,37 +93,32 @@ namespace TextMeshProEffector {
                 // テキスト変更時
                 if(different) {
                     // 設定された文字列からタグを除去してタグ情報のオブジェクトを作成
-                    if(_effectContainer == null) {
-                        _tagContainer.Clear();
+                    if(_textBackingArrayInfo == null) {
+                        _textBackingArrayInfo = typeof(TMP_Text).GetField("m_TextBackingArray", BindingFlags.NonPublic | BindingFlags.Instance);
+                        _textBackingArray_arrayInfo = _textBackingArrayInfo.FieldType.GetField("m_Array", BindingFlags.NonPublic | BindingFlags.Instance);
+                        _textBackingArray_countInfo = _textBackingArrayInfo.FieldType.GetField("m_Count", BindingFlags.NonPublic | BindingFlags.Instance);
+                        _inputSourceInfo = typeof(TMP_Text).GetField("m_inputSource", BindingFlags.NonPublic | BindingFlags.Instance);
                     }
-                    else {
-                        if(_textBackingArrayInfo == null) {
-                            _textBackingArrayInfo = typeof(TMP_Text).GetField("m_TextBackingArray", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _textBackingArray_arrayInfo = _textBackingArrayInfo.FieldType.GetField("m_Array", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _textBackingArray_countInfo = _textBackingArrayInfo.FieldType.GetField("m_Count", BindingFlags.NonPublic | BindingFlags.Instance);
-                            _inputSourceInfo = typeof(TMP_Text).GetField("m_inputSource", BindingFlags.NonPublic | BindingFlags.Instance);
-                        }
 
-                        // リッチテキストタグなどが除去される前のテキストを取得
-                        object textBackingArray = _textBackingArrayInfo.GetValue(_textComponent);
-                        uint[] textBackingArray_array = (uint[]) _textBackingArray_arrayInfo.GetValue(textBackingArray);
-                        int textBackingArray_count = (int) _textBackingArray_countInfo.GetValue(textBackingArray);
+                    // リッチテキストタグなどが除去される前のテキストを取得
+                    object textBackingArray = _textBackingArrayInfo.GetValue(_textComponent);
+                    uint[] textBackingArray_array = (uint[]) _textBackingArray_arrayInfo.GetValue(textBackingArray);
+                    int textBackingArray_count = (int) _textBackingArray_countInfo.GetValue(textBackingArray);
 
 #if UNITY_EDITOR
-                        // internal enum TextInputSources { TextInputBox = 0, SetText = 1, SetTextArray = 2, TextString = 3 };
-                        // 0,3の場合はTMP_Text内部でtextPreprocessorを使って文字列がパースされる
-                        int inputSource = (int) _inputSourceInfo.GetValue(_textComponent);
-                        // ITextPreprocessorを通さないケースの場合は文字列を流し直して無理やりITextPreprocessorを通す
-                        if(inputSource == 1 || inputSource == 2) {
-                            _textComponent.SetText(_textComponent.text);
-                        }
-#else
-                        // 加工+タグ情報オブジェクト生成
-                        _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
-                        _textPreprocessor.ProcessText(this);
-                        _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
-#endif
+                    // internal enum TextInputSources { TextInputBox = 0, SetText = 1, SetTextArray = 2, TextString = 3 };
+                    // 0,3の場合はTMP_Text内部でtextPreprocessorを使って文字列がパースされる
+                    int inputSource = (int) _inputSourceInfo.GetValue(_textComponent);
+                    // ITextPreprocessorを通さないケースの場合は文字列を流し直して無理やりITextPreprocessorを通す
+                    if(inputSource == 1 || inputSource == 2) {
+                        _textComponent.SetText(_textComponent.text);
                     }
+#else
+                    // 加工+タグ情報オブジェクト生成
+                    _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
+                    _textPreprocessor.ProcessText(this);
+                    _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
+#endif
                     // テキスト変更時共通処理
                     ResetTypinRelatedValues();
 

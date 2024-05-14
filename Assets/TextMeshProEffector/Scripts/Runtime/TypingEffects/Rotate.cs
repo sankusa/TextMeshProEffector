@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEffects {
-    [CreateAssetMenu(fileName = nameof(Rotate), menuName = nameof(TextMeshProEffector) + "/" + nameof(TypingEffects) + "/" + nameof(Rotate))]
     public class Rotate : TMPE_TypingEffect {
         [SerializeField, Min(0)] private float _delay;
         [SerializeField, Min(0)] private float _duration;

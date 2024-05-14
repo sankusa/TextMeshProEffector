@@ -19,6 +19,6 @@ namespace TextMeshProEffector {
 
         protected virtual void UpdateVertexByCharacter(TMPE_Tag tag, TMPE_EffectorBase effector, int charInfoIndex) {}
 
-        public override string GetCaption() => string.IsNullOrEmpty(_tagName) ? $"{name} -------- All Characters" : $"{name} -------- <{_tagName}>";
+        public override string GetCaption() => string.IsNullOrEmpty(_tagName) ? "" : $"<{_tagName}>";
     }
 }

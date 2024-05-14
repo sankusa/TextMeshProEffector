@@ -5,12 +5,12 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector {
-    [CreateAssetMenu(menuName = nameof(TextMeshProEffector) + "/" + nameof(TMPE_EffectContainer), fileName = nameof(TMPE_EffectContainer))]
-    public class TMPE_EffectContainer : ScriptableObject {
+    [CreateAssetMenu(menuName = nameof(TextMeshProEffector) + "/" + nameof(TMPE_BasicEffectContainer), fileName = nameof(TMPE_BasicEffectContainer))]
+    public class TMPE_BasicEffectContainer : ScriptableObject {
         [SerializeReference] private List<TMPE_BasicEffect> _basicEffects;
         public List<TMPE_BasicEffect> BasicEffects => _basicEffects;
 
-        public void UpdateTextInfo_BasicEffect(TMPE_EffectorBase effector) {
+        public void UpdateVertex(TMPE_EffectorBase effector) {
             List<TMPE_Tag> tags = effector.TagContainer.BasicTags;
             foreach(TMPE_BasicEffect basicEffect in _basicEffects) {
                 if(basicEffect == null) continue;

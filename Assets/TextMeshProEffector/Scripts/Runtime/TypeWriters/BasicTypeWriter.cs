@@ -22,7 +22,7 @@ namespace TextMeshProEffector.TypeWriters {
     }
 
     [CreateAssetMenu(menuName = nameof(TextMeshProEffector) + "/" + nameof(TypeWriters) + "/" + nameof(BasicTypeWriter), fileName = nameof(BasicTypeWriter))]
-    public class BasicTypeWriter : TMPE_TypeWriterGeneric<BasicTypeWriterStatus, BasicTypeWriterCharacterTypingStatus> {
+    public class BasicTypeWriter : TMPE_TypingBehaviour<BasicTypeWriterStatus, BasicTypeWriterCharacterTypingStatus> {
         private static string[] _acceptableTagNames = new string[]{"time"};
         public override string[] AcceptableTagNames => _acceptableTagNames;
 
@@ -50,14 +50,14 @@ namespace TextMeshProEffector.TypeWriters {
             }
         }
 
-        protected override void UpdateTypingMain(TMPE_EffectorBase effector) {
+        protected override void UpdateTypingMain(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter) {
             TMP_TextInfo textInfo = effector.TextInfo;
             BasicTypeWriterStatus status = _statusDic[effector];
 
             for(int i = 0; i < textInfo.characterCount; i++) {
                 var charStatus = status.CharacterTypingStatuses[i];
                 if(charStatus.State == CharacterTypingState.Idle && charStatus.FixedTypeTiming >= 0 && status.ElapsedTimeForTyping >= charStatus.FixedTypeTiming) {
-                    TryType(effector, i); 
+                    TryType(effector, typeWriter, i); 
                 }
             }
 
@@ -76,7 +76,7 @@ namespace TextMeshProEffector.TypeWriters {
                 int typeEndIndex = characterNumShouldBeTyped - 1;
                 for(int i = typeStartIndex; i <= typeEndIndex; i++) {
                     if(status.CharacterTypingStatuses[i].FixedTypeTiming < 0) {
-                        if(TryType(effector, i) == false) break;
+                        if(TryType(effector, typeWriter, i) == false) break;
                     }
 
                     status.TypedCharacterCount++;

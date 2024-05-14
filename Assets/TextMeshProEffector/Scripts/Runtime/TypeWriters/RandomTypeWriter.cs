@@ -20,7 +20,7 @@ namespace TextMeshProEffector {
     }
 
     [CreateAssetMenu(menuName = nameof(TextMeshProEffector) + "/" + nameof(TypeWriters) + "/" + nameof(RandomTypeWriter), fileName = nameof(RandomTypeWriter))]
-    public class RandomTypeWriter : TMPE_TypeWriterGeneric<RandomTypeWriterStatus, CharacterTypingStatus> {
+    public class RandomTypeWriter : TMPE_TypingBehaviour<RandomTypeWriterStatus, CharacterTypingStatus> {
         [SerializeField, Min(0)] private float _intervalPerChar;
         [SerializeField, Min(0)] private float _intervalPerCharRandomness;
 
@@ -29,7 +29,7 @@ namespace TextMeshProEffector {
             _statusDic[effector].NextTypeIndex = (int) (Random.value * effector.TextInfo.characterCount);
         }
 
-        protected override void UpdateTypingMain(TMPE_EffectorBase effector) {
+        protected override void UpdateTypingMain(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter) {
             TMP_TextInfo textInfo = effector.TextInfo;
             RandomTypeWriterStatus status = _statusDic[effector];
 
@@ -40,7 +40,7 @@ namespace TextMeshProEffector {
             while(status.Timer > status.NextTypeInterval) {
                 status.Timer -= status.NextTypeInterval;
 
-                if(TryType(effector, status.NextTypeIndex) == false) break;
+                if(TryType(effector, typeWriter, status.NextTypeIndex) == false) break;
 
                 // 次のタイピングの情報を生成
                 status.NextTypeInterval = Mathf.Max(_intervalPerChar + (2f * Random.value - 1) * _intervalPerCharRandomness, 0);

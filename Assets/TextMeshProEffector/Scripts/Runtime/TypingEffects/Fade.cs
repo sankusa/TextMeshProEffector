@@ -5,7 +5,6 @@ using UnityEngine;
 using TMPro;
 
 namespace TextMeshProEffector.TypingEffects {
-    [CreateAssetMenu(fileName = nameof(Fade), menuName = nameof(TextMeshProEffector) + "/" + nameof(TypingEffects) + "/" + nameof(Fade))]
     public class Fade : TMPE_TypingEffect {
         [SerializeField, Min(0)] private float _delay;
         [SerializeField, Min(0)] private float _duration;
