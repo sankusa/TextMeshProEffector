@@ -11,8 +11,6 @@ namespace TextMeshProEffector {
         private static GUIStyle _groupBoxSkin;
         private static GUIStyle GroupBoxSkin => _groupBoxSkin ??= new GUIStyle("GroupBox") {margin = new RectOffset()};
 
-        private Editor _settingInspector;
-
         private EffectContainerReorderableList<TMPE_TypingEffectContainer> _typingEffectContainer;
         private EffectContainerReorderableList<TMPE_TypingEventEffectContainer> _typingEventEffectContainer;
 
@@ -33,26 +31,24 @@ namespace TextMeshProEffector {
                 if(newTypeWriterObj != typingBehaviourProp.objectReferenceValue) {
                     TMPE_TypingBehaviourBase oldTB = typingBehaviourProp.objectReferenceValue as TMPE_TypingBehaviourBase;
                     TMPE_TypingBehaviourBase newTB = newTypeWriterObj as TMPE_TypingBehaviourBase;
-Debug.Log(oldTB + "/ " + newTB + "/ " + effector); 
-                    if(newTB != null && effector.TypeWriters.Where(x => x != null &&  x.TypingBehaviour == newTB).Count() > 0) {
-                        Debug.Log("TypeWriter cannot be duplicated");
+
+                    // if(newTB != null && effector.TypeWriters.Where(x => x != null &&  x.TypingBehaviour == newTB).Count() > 0) {
+                    //     Debug.Log("TypeWriter cannot be duplicated");
+                    // }
+                    // else {
+                    if(oldTB != null) {
+                        oldTB.OnDetach(typeWriter);
                     }
-                    else {
-                        if(oldTB != null) {
-                            oldTB.OnDetach(effector);
-                        }
 
-                        typingBehaviourProp.objectReferenceValue = newTypeWriterObj;
+                    typingBehaviourProp.objectReferenceValue = newTypeWriterObj;
 
-                        serializedObject.ApplyModifiedProperties();
-                        
-                        if(newTB != null) {
-                            newTB.OnAttach(effector);
-                            newTB.OnTextChanged(effector);
-                        }
-
-                        _settingInspector = null;
+                    serializedObject.ApplyModifiedProperties();
+                    
+                    if(newTB != null) {
+                        newTB.OnAttach(typeWriter);
+                        newTB.OnTextChanged(typeWriter);
                     }
+                    // }
                 }
 
                 if(GUILayout.Button("Inspector", GUILayout.Width(70), GUILayout.Height(EditorGUIUtility.singleLineHeight))) {

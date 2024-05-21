@@ -15,8 +15,8 @@ namespace TextMeshProEffector.TypeWriters {
     }
     public class BasicTypeWriterStatus : TypeWriterStatus<BasicTypeWriterCharacterTypingStatus> {
         public int TypedCharacterCount {get; set;}
-        public override void Reset(TMPE_EffectorBase effector) {
-            base.Reset(effector);
+        public override void Reset(TMPE_TypeWriter typeWriter) {
+            base.Reset(typeWriter);
             TypedCharacterCount = 0;
         }
     }
@@ -35,10 +35,10 @@ namespace TextMeshProEffector.TypeWriters {
             return false;
         }
 
-        public override void OnTextChanged(TMPE_EffectorBase effector) {
-            base.OnTextChanged(effector);
-            BasicTypeWriterStatus status = _statusDic[effector];
-            List<TMPE_Tag> typeWriterControlTags = effector.TagContainer.TypeWriterControlTags[effector.GetTypeWriterIndex(this)];
+        public override void OnTextChanged(TMPE_TypeWriter typeWriter) {
+            base.OnTextChanged(typeWriter);
+            BasicTypeWriterStatus status = _statusDic[typeWriter];
+            List<TMPE_Tag> typeWriterControlTags = typeWriter.Effector.TagContainer.TypeWriterControlTags[typeWriter.Effector.GetTypeWriterIndex(this)];
             for(int i = 0; i < typeWriterControlTags.Count; i++) {
                 TMPE_Tag tag = typeWriterControlTags[i];
                 if(tag.Name == "time") {
@@ -50,9 +50,10 @@ namespace TextMeshProEffector.TypeWriters {
             }
         }
 
-        protected override void UpdateTypingMain(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter) {
+        protected override void UpdateTypingMain(TMPE_TypeWriter typeWriter) {
+            TMPE_EffectorBase effector = typeWriter.Effector;
             TMP_TextInfo textInfo = effector.TextInfo;
-            BasicTypeWriterStatus status = _statusDic[effector];
+            BasicTypeWriterStatus status = _statusDic[typeWriter];
 
             for(int i = 0; i < textInfo.characterCount; i++) {
                 var charStatus = status.CharacterTypingStatuses[i];

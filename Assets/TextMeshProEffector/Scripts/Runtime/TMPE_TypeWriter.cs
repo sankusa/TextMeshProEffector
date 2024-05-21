@@ -66,12 +66,12 @@ namespace TextMeshProEffector {
         }
 
         public bool UpdateVertex() {
-            _typingBehaviour.Tick(_effector);
+            _typingBehaviour.Tick(this);
 
             _isPlaying = false;
             foreach(TMPE_TypingEffectContainer typingEffectContainer in  _typingEffectContainers) {
                 if(typingEffectContainer == null) continue;
-                _isPlaying |= typingEffectContainer.UpdateVertex(_effector, _effector.TypeWriters.FindIndex(x => x == this));
+                _isPlaying |= typingEffectContainer.UpdateVertex(this, _effector.TypeWriters.FindIndex(x => x == this));
             }
             return _isPlaying;
         }

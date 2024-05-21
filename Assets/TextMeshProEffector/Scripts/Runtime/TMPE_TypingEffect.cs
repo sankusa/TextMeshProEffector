@@ -7,14 +7,15 @@ using UnityEngine;
 namespace TextMeshProEffector {
     [Serializable]
     public abstract class TMPE_TypingEffect : TMPE_EffectBase {
-        public virtual bool UpdateVertex(TMPE_Tag tag, TMPE_EffectorBase effector, TMPE_TypingBehaviourBase typingBehaviour) {
+        public virtual bool UpdateVertex(TMPE_Tag tag, TMPE_TypeWriter typeWriter, TMPE_TypingBehaviourBase typingBehaviour) {
+            TMPE_EffectorBase effector = typeWriter.Effector;
             TMP_TextInfo textInfo = effector.TextInfo;
             bool isPlaying = false;
             for(int i = 0; i < textInfo.characterCount; i++) {
                 TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
                 if(tag == null || (tag.StartIndex <= charInfo.index && charInfo.index <= tag.EndIndex)) {
-                    if(effector.TypingInfo[i].Visiblity == CharacterVisiblity.Visible && typingBehaviour.IsTypedCharacter(effector, i)) {
-                        isPlaying |= UpdateVertexByCharacter(tag, effector, i, typingBehaviour.GetElapsedTimeForTypingEffect(effector, i));
+                    if(effector.TypingInfo[i].Visiblity == CharacterVisiblity.Visible && typingBehaviour.IsTypedCharacter(typeWriter, i)) {
+                        isPlaying |= UpdateVertexByCharacter(tag, effector, i, typingBehaviour.GetElapsedTimeForTypingEffect(typeWriter, i));
                     }
                 }
             }

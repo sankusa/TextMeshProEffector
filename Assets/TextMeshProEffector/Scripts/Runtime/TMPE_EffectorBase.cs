@@ -138,23 +138,23 @@ namespace TextMeshProEffector {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
                 if(typeWriter == null) continue;
                 if(typeWriter.TypingBehaviour != null) {
-                    if(typeWriter.TypingBehaviour.IsStartedTyping(this) == false) {
+                    if(typeWriter.TypingBehaviour.IsStartedTyping(typeWriter) == false) {
                         if(typeWriter.StartTypingAuto == AutoStartTypingType.Auto) {
-                            typeWriter.TypingBehaviour.StartTyping(this);
+                            typeWriter.TypingBehaviour.StartTyping(typeWriter);
                         }
                         else if(typeWriter.StartTypingAuto == AutoStartTypingType.OnOtherTypeWriterStartedTyping) {
                             TMPE_TypingBehaviourBase targetTypeWriter = _typeWriters[typeWriter.TargetTypeWriterIndex].TypingBehaviour;
                             if(targetTypeWriter != null) {
-                                if(targetTypeWriter.GetElapsedTimeForTyping(this) > typeWriter.DelayFromTargetTypeWriterStartedTyping) {
-                                    typeWriter.TypingBehaviour.StartTyping(this);
+                                if(targetTypeWriter.GetElapsedTimeForTyping(typeWriter) > typeWriter.DelayFromTargetTypeWriterStartedTyping) {
+                                    typeWriter.TypingBehaviour.StartTyping(typeWriter);
                                 }
                             }
                         }
                     }
                     else {
-                        if(typeWriter.Repeat && typeWriter.RepeatInterval > 0 && typeWriter.TypingBehaviour.GetElapsedTimeForTyping(this) > typeWriter.RepeatInterval) {
-                            typeWriter.TypingBehaviour.OnTextChanged(this);
-                            typeWriter.TypingBehaviour.StartTyping(this);
+                        if(typeWriter.Repeat && typeWriter.RepeatInterval > 0 && typeWriter.TypingBehaviour.GetElapsedTimeForTyping(typeWriter) > typeWriter.RepeatInterval) {
+                            typeWriter.TypingBehaviour.OnTextChanged(typeWriter);
+                            typeWriter.TypingBehaviour.StartTyping(typeWriter);
                         }
                     }
                 }
@@ -167,7 +167,7 @@ namespace TextMeshProEffector {
             _typingPauseTimer = Mathf.Max(_typingPauseTimer - Time.deltaTime, 0);
             if(_typingPauseTimer == 0) {
                 foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                    typeWriter?.TypingBehaviour?.UpdateTyping(this, typeWriter);
+                    typeWriter?.TypingBehaviour?.UpdateTyping(typeWriter);
                 }
             }
 
@@ -189,7 +189,7 @@ namespace TextMeshProEffector {
         // Unityイベント関数
         protected virtual void OnDestroy() {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.OnDetach(this);
+                typeWriter?.TypingBehaviour?.OnDetach(typeWriter);
             }
         }
 
@@ -200,7 +200,7 @@ namespace TextMeshProEffector {
             _textInfo = _textComponent.textInfo;
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
                 if(typeWriter == null) continue;
-                typeWriter.TypingBehaviour?.OnAttach(this);
+                typeWriter.TypingBehaviour?.OnAttach(typeWriter);
             }
             ResetTypinRelatedValues();
             CacheVertexData();
@@ -261,7 +261,7 @@ namespace TextMeshProEffector {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
                 if(typeWriter == null) continue;
                 typeWriter.ResetTypinRelatedValues();
-                typeWriter.TypingBehaviour?.OnTextChanged(this);
+                typeWriter.TypingBehaviour?.OnTextChanged(typeWriter);
             }
 
             _onTypingCompleted.Reset();
@@ -314,7 +314,7 @@ namespace TextMeshProEffector {
                 TMPE_TypeWriter typeWriter = _typeWriters[i];
                 if(typeWriter == null || typeWriter.TypingBehaviour == null) continue;
                 bool currentTypeWriterPlaying = typeWriter.UpdateVertex();
-                bool currentTypeWriterFinishedTyping = typeWriter.TypingBehaviour.IsFinishedTyping(this);
+                bool currentTypeWriterFinishedTyping = typeWriter.TypingBehaviour.IsFinishedTyping(typeWriter);
                 if(typeWriter.OnTypingCompletedInternal.IsInvoked == false) {
                     if(currentTypeWriterPlaying == false && currentTypeWriterFinishedTyping) {
                         typeWriter.OnTypingCompletedInternal.Invoke();
@@ -376,98 +376,98 @@ namespace TextMeshProEffector {
 
         public void StartTyping() {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.StartTyping(this);
+                typeWriter?.TypingBehaviour?.StartTyping(typeWriter);
             }
         }
         public void StartTyping(int typeWriterIndex) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.StartTyping(this);
+            _typeWriters[typeWriterIndex].TypingBehaviour.StartTyping(_typeWriters[typeWriterIndex]);
         }
 
         public void PauseTyping() {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.PauseTyping(this);
+                typeWriter?.TypingBehaviour?.PauseTyping(typeWriter);
             }
         }
         public void PauseTyping(int typeWriterIndex) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.PauseTyping(this);
+            _typeWriters[typeWriterIndex].TypingBehaviour.PauseTyping(_typeWriters[typeWriterIndex]);
         }
 
         public void DelayTyping(float seconds) {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.DelayTyping(this, seconds);
+                typeWriter?.TypingBehaviour?.DelayTyping(typeWriter, seconds);
             }
         }
         public void DelayTyping(float seconds, int typeWriterIndex) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.DelayTyping(this, seconds);
+            _typeWriters[typeWriterIndex].TypingBehaviour.DelayTyping(_typeWriters[typeWriterIndex], seconds);
         }
 
         public void ResumeTyping() {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.ResumeTyping(this);
+                typeWriter?.TypingBehaviour?.ResumeTyping(typeWriter);
             }
         }
         public void ResumeTyping(int typeWriterIndex) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.ResumeTyping(this);
+            _typeWriters[typeWriterIndex].TypingBehaviour.ResumeTyping(_typeWriters[typeWriterIndex]);
         }
 
         public bool IsPausedTyping(int typeWriterIndex) {
             TMPE_TypeWriter typeWriter = _typeWriters[typeWriterIndex];
             if(typeWriter == null || typeWriter.TypingBehaviour == null) return false;
-            return typeWriter.TypingBehaviour.IsPausedTyping(this);
+            return typeWriter.TypingBehaviour.IsPausedTyping(typeWriter);
         }
         public void IsPausedTypingAny() {
             bool paused = false;
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
                 if(typeWriter == null || typeWriter.TypingBehaviour == null) continue;
-                paused |= typeWriter.TypingBehaviour.IsPausedTyping(this);
+                paused |= typeWriter.TypingBehaviour.IsPausedTyping(typeWriter);
             }
         }
 
         public void SetTypeWriterSpeed(float speed) {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.SetTypeWriterSpeed(this, speed);
+                typeWriter?.TypingBehaviour?.SetTypeWriterSpeed(typeWriter, speed);
             }
         }
         public void SetTypeWriterSpeed(int typeWriterIndex, int speed) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.SetTypeWriterSpeed(this, speed);
+            _typeWriters[typeWriterIndex].TypingBehaviour.SetTypeWriterSpeed(_typeWriters[typeWriterIndex], speed);
         }
 
         public void SetTypingSpeed(float speed) {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.SetTypingSpeed(this, speed);
+                typeWriter?.TypingBehaviour?.SetTypingSpeed(typeWriter, speed);
             }
         }
         public void SetTypingSpeed(int typeWriterIndex, int speed) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.SetTypingSpeed(this, speed);
+            _typeWriters[typeWriterIndex].TypingBehaviour.SetTypingSpeed(_typeWriters[typeWriterIndex], speed);
         }
 
         public void SetTypingEffectSpeed(float speed) {
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
-                typeWriter?.TypingBehaviour?.SetTypingEffectSpeed(this, speed);
+                typeWriter?.TypingBehaviour?.SetTypingEffectSpeed(typeWriter, speed);
             }
         }
         public void SetTypingEffectSpeed(int typeWriterIndex, int speed) {
-            _typeWriters[typeWriterIndex].TypingBehaviour.SetTypingEffectSpeed(this, speed);
+            _typeWriters[typeWriterIndex].TypingBehaviour.SetTypingEffectSpeed(_typeWriters[typeWriterIndex], speed);
         }
 
         public bool IsStartedTyping(int typeWriterIndex) {
             TMPE_TypeWriter typeWriter = _typeWriters[typeWriterIndex];
             if(typeWriter == null || typeWriter.TypingBehaviour == null) return true;
-            return typeWriter.TypingBehaviour.IsStartedTyping(this);
+            return typeWriter.TypingBehaviour.IsStartedTyping(typeWriter);
         }
 
         public bool IsFinishedTyping() {
             bool isFinished = true;
             foreach(TMPE_TypeWriter typeWriter in _typeWriters) {
                 if(typeWriter == null || typeWriter.TypingBehaviour == null) continue; 
-                isFinished &= typeWriter.TypingBehaviour.IsFinishedTyping(this);
+                isFinished &= typeWriter.TypingBehaviour.IsFinishedTyping(typeWriter);
             }
             return isFinished;
         }
         public bool IsFinishedTyping(int typeWriterIndex) {
             TMPE_TypeWriter typeWriter = _typeWriters[typeWriterIndex];
             if(typeWriter.TypingBehaviour == null) return true;
-            return typeWriter.TypingBehaviour.IsFinishedTyping(this);
+            return typeWriter.TypingBehaviour.IsFinishedTyping(typeWriter);
         }
 
         public bool IsPlayingTypingEffect() {

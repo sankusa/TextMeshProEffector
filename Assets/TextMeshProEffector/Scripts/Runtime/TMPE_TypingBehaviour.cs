@@ -30,7 +30,8 @@ namespace TextMeshProEffector {
         private CharStatus[] _typingStatuses;
         public CharStatus[] CharacterTypingStatuses => _typingStatuses;
 
-        public virtual void Reset(TMPE_EffectorBase effector) {
+        public virtual void Reset(TMPE_TypeWriter typeWriter) {
+            TMPE_EffectorBase effector = typeWriter.Effector;
             TypingStarted = false;
             ElapsedTimeForTyping = 0;
             IsPaused = false;
@@ -60,43 +61,43 @@ namespace TextMeshProEffector {
     }
 
     public abstract class TMPE_TypingBehaviour<Status, CharStatus> : TMPE_TypingBehaviourBase where Status : TypeWriterStatus<CharStatus>, new() where CharStatus : CharacterTypingStatus, new() {
-        protected Dictionary<TMPE_EffectorBase, Status> _statusDic = new Dictionary<TMPE_EffectorBase, Status>();
+        protected Dictionary<TMPE_TypeWriter, Status> _statusDic = new Dictionary<TMPE_TypeWriter, Status>();
 
-        public override bool IsFinishedTyping(TMPE_EffectorBase effector) {
-            Status status = _statusDic[effector];
+        public override bool IsFinishedTyping(TMPE_TypeWriter typeWriter) {
+            Status status = _statusDic[typeWriter];
             int count = 0;
-            for(int i = 0; i < effector.TextInfo.characterCount; i++) {
+            for(int i = 0; i < typeWriter.Effector.TextInfo.characterCount; i++) {
                 if(status.CharacterTypingStatuses[i].State == CharacterTypingState.Idle) count++;
             }
             return count == 0;
         }
 
-        public override void StartTyping(TMPE_EffectorBase effector) {
-            Status status = _statusDic[effector];
+        public override void StartTyping(TMPE_TypeWriter typeWriter) {
+            Status status = _statusDic[typeWriter];
             status.TypingStarted = true;
         }
 
-        public override bool IsStartedTyping(TMPE_EffectorBase effector) {
-            Status status = _statusDic[effector];
+        public override bool IsStartedTyping(TMPE_TypeWriter typeWriter) {
+            Status status = _statusDic[typeWriter];
             return status.TypingStarted;
         }
 
-        public override void OnAttach(TMPE_EffectorBase effector) {
+        public override void OnAttach(TMPE_TypeWriter typeWriter) {
             Status status = new Status();
-            status.Reset(effector); 
-            _statusDic[effector] = status;
+            status.Reset(typeWriter); 
+            _statusDic[typeWriter] = status;
         }
 
-        public override void OnDetach(TMPE_EffectorBase effector) {
-            _statusDic.Remove(effector);
+        public override void OnDetach(TMPE_TypeWriter typeWriter) {
+            _statusDic.Remove(typeWriter);
         }
 
-        public override void OnTextChanged(TMPE_EffectorBase effector) {
-            _statusDic[effector].Reset(effector);
+        public override void OnTextChanged(TMPE_TypeWriter typeWriter) {
+            _statusDic[typeWriter].Reset(typeWriter);
         }
 
-        public sealed override void UpdateTyping(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter) {
-            Status status = _statusDic[effector];
+        public sealed override void UpdateTyping(TMPE_TypeWriter typeWriter) {
+            Status status = _statusDic[typeWriter];
 
             if(status.TypingStarted == false) return;
 
@@ -106,13 +107,13 @@ namespace TextMeshProEffector {
 
             status.ElapsedTimeForTyping += Time.deltaTime * status.Speed * status.TypingSpeed;
 
-            UpdateTypingMain(effector, typeWriter);
+            UpdateTypingMain(typeWriter);
         }
 
-        protected abstract void UpdateTypingMain(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter);
+        protected abstract void UpdateTypingMain(TMPE_TypeWriter typeWriter);
 
         public bool TryType(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter, int characterInfoIndex, bool force = false, bool ignoreTypingEvent = false) {
-            Status status = _statusDic[effector];
+            Status status = _statusDic[typeWriter];
 
             if(force == false) {
                 if(status.IsPaused || status.DelayTimer > 0) return false;
@@ -125,7 +126,7 @@ namespace TextMeshProEffector {
                 if(ignoreTypingEvent == false) {
                     foreach(TMPE_TypingEventEffectContainer typingEventEffectContainer in typeWriter.TypingEventEffectContainers) {
                         if(typingEventEffectContainer == null) continue;
-                        typingEventEffectContainer.ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming.BeforeTyping, effector, typeWriterIndex, characterInfoIndex);
+                        typingEventEffectContainer.ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming.BeforeTyping, typeWriter, typeWriterIndex, characterInfoIndex);
                     }
                 }
                 status.CharacterTypingStatuses[characterInfoIndex].BeforeTypingEventInvoked = true;
@@ -140,7 +141,7 @@ namespace TextMeshProEffector {
             if(ignoreTypingEvent == false) {
                 foreach(TMPE_TypingEventEffectContainer typingEventEffectContainer in typeWriter.TypingEventEffectContainers) {
                     if(typingEventEffectContainer == null) continue;
-                    typingEventEffectContainer.ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming.AfterTyping, effector, typeWriterIndex, characterInfoIndex);
+                    typingEventEffectContainer.ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming.AfterTyping, typeWriter, typeWriterIndex, characterInfoIndex);
                 }
             }
             ChangeCharacterVisiblityIfNeed(effector, characterInfoIndex);
@@ -148,9 +149,9 @@ namespace TextMeshProEffector {
             return true;
         }
 
-        public override void Tick(TMPE_EffectorBase effector) {
-            TMP_TextInfo textInfo = effector.TextInfo;
-            Status status = _statusDic[effector];
+        public override void Tick(TMPE_TypeWriter typeWriter) {
+            TMP_TextInfo textInfo = typeWriter.Effector.TextInfo;
+            Status status = _statusDic[typeWriter];
             for(int i = 0; i < textInfo.characterCount; i++) {
                 if(status.CharacterTypingStatuses[i].State == CharacterTypingState.Typed) {
                     status.CharacterTypingStatuses[i].ElapsedTimeForTypingEffect += Time.deltaTime * status.Speed * status.TypingEffectSpeed;
@@ -158,41 +159,41 @@ namespace TextMeshProEffector {
             }
         }
 
-        public override void PauseTyping(TMPE_EffectorBase effector) {
-            _statusDic[effector].IsPaused = true;
+        public override void PauseTyping(TMPE_TypeWriter typeWriter) {
+            _statusDic[typeWriter].IsPaused = true;
         }
 
-        public override void DelayTyping(TMPE_EffectorBase effector, float seconds) {
-            _statusDic[effector].DelayTimer = seconds;
+        public override void DelayTyping(TMPE_TypeWriter typeWriter, float seconds) {
+            _statusDic[typeWriter].DelayTimer = seconds;
         }
 
-        public override void ResumeTyping(TMPE_EffectorBase effector) {
-            _statusDic[effector].IsPaused = false;
+        public override void ResumeTyping(TMPE_TypeWriter typeWriter) {
+            _statusDic[typeWriter].IsPaused = false;
         }
 
-        public override bool IsPausedTyping(TMPE_EffectorBase effector) => _statusDic[effector].IsPaused;
+        public override bool IsPausedTyping(TMPE_TypeWriter typeWriter) => _statusDic[typeWriter].IsPaused;
 
-        public override void SetTypeWriterSpeed(TMPE_EffectorBase effector, float speed) => _statusDic[effector].Speed = speed;
-        public override void SetTypingSpeed(TMPE_EffectorBase effector, float speed) => _statusDic[effector].TypingSpeed = speed;
-        public override void SetTypingEffectSpeed(TMPE_EffectorBase effector, float speed) => _statusDic[effector].TypingEffectSpeed = speed;
+        public override void SetTypeWriterSpeed(TMPE_TypeWriter typeWriter, float speed) => _statusDic[typeWriter].Speed = speed;
+        public override void SetTypingSpeed(TMPE_TypeWriter typeWriter, float speed) => _statusDic[typeWriter].TypingSpeed = speed;
+        public override void SetTypingEffectSpeed(TMPE_TypeWriter typeWriter, float speed) => _statusDic[typeWriter].TypingEffectSpeed = speed;
 
-        public override float GetElapsedTimeForTyping(TMPE_EffectorBase effector) {
-            return _statusDic[effector].ElapsedTimeForTyping;
+        public override float GetElapsedTimeForTyping(TMPE_TypeWriter typeWriter) {
+            return _statusDic[typeWriter].ElapsedTimeForTyping;
         }
 
-        public override float GetElapsedTimeForTypingEffect(TMPE_EffectorBase effector, int characterInfoIndex) {
-            return _statusDic[effector].CharacterTypingStatuses[characterInfoIndex].ElapsedTimeForTypingEffect;
+        public override float GetElapsedTimeForTypingEffect(TMPE_TypeWriter typeWriter, int characterInfoIndex) {
+            return _statusDic[typeWriter].CharacterTypingStatuses[characterInfoIndex].ElapsedTimeForTypingEffect;
         }
 
-        public override bool IsTypedCharacter(TMPE_EffectorBase effector, int characterInfoIndex) {
-            return _statusDic[effector].CharacterTypingStatuses[characterInfoIndex].State == CharacterTypingState.Typed;
+        public override bool IsTypedCharacter(TMPE_TypeWriter typeWriter, int characterInfoIndex) {
+            return _statusDic[typeWriter].CharacterTypingStatuses[characterInfoIndex].State == CharacterTypingState.Typed;
         }
     }
 
     public abstract class TMPE_TypingBehaviourBase : ScriptableObject {
-        public abstract bool IsFinishedTyping(TMPE_EffectorBase effector);
+        public abstract bool IsFinishedTyping(TMPE_TypeWriter typeWriter);
 
-        public virtual void Tick(TMPE_EffectorBase effector) {}
+        public virtual void Tick(TMPE_TypeWriter typeWriter) {}
 
         protected void ChangeCharacterVisiblityIfNeed(TMPE_EffectorBase effector, int characterinfoIndex) {
             TMPE_TypeWriter typeWriter = effector.TypeWriters[effector.GetTypeWriterIndex(this)];
@@ -204,28 +205,28 @@ namespace TextMeshProEffector {
             }
         }
 
-        public abstract void StartTyping(TMPE_EffectorBase effector);
-        public abstract bool IsStartedTyping(TMPE_EffectorBase effector);
-        public virtual void OnAttach(TMPE_EffectorBase effector) {}
-        public virtual void OnDetach(TMPE_EffectorBase effector) {}
-        public virtual void OnTextChanged(TMPE_EffectorBase effector) {}
-        public virtual void UpdateTyping(TMPE_EffectorBase effector, TMPE_TypeWriter typeWriter) {}
-        public virtual void PauseTyping(TMPE_EffectorBase effector) => Debug.LogWarning(nameof(PauseTyping) + " is not implemented");
-        public virtual void DelayTyping(TMPE_EffectorBase effector, float seconds) => Debug.LogWarning(nameof(PauseTyping) + " is not implemented");
-        public virtual void ResumeTyping(TMPE_EffectorBase effector) => Debug.LogWarning(nameof(ResumeTyping) + " is not implemented");
-        public virtual bool IsPausedTyping(TMPE_EffectorBase effector) => false;
-        public virtual void SetTypeWriterSpeed(TMPE_EffectorBase effector, float speed) => Debug.LogWarning(nameof(SetTypeWriterSpeed) + " is not implemented");
-        public virtual void SetTypingSpeed(TMPE_EffectorBase effector, float speed) => Debug.LogWarning(nameof(SetTypingSpeed) + " is not implemented");
-        public virtual void SetTypingEffectSpeed(TMPE_EffectorBase effector, float speed) => Debug.LogWarning(nameof(SetTypingEffectSpeed) + " is not implemented");
-        public virtual float GetElapsedTimeForTyping(TMPE_EffectorBase effector) {
+        public abstract void StartTyping(TMPE_TypeWriter typeWriter);
+        public abstract bool IsStartedTyping(TMPE_TypeWriter typeWriter);
+        public virtual void OnAttach(TMPE_TypeWriter typeWriter) {}
+        public virtual void OnDetach(TMPE_TypeWriter typeWriter) {}
+        public virtual void OnTextChanged(TMPE_TypeWriter typeWriter) {}
+        public virtual void UpdateTyping(TMPE_TypeWriter typeWriter) {}
+        public virtual void PauseTyping(TMPE_TypeWriter typeWriter) => Debug.LogWarning(nameof(PauseTyping) + " is not implemented");
+        public virtual void DelayTyping(TMPE_TypeWriter typeWriter, float seconds) => Debug.LogWarning(nameof(PauseTyping) + " is not implemented");
+        public virtual void ResumeTyping(TMPE_TypeWriter typeWriter) => Debug.LogWarning(nameof(ResumeTyping) + " is not implemented");
+        public virtual bool IsPausedTyping(TMPE_TypeWriter typeWriter) => false;
+        public virtual void SetTypeWriterSpeed(TMPE_TypeWriter typeWriter, float speed) => Debug.LogWarning(nameof(SetTypeWriterSpeed) + " is not implemented");
+        public virtual void SetTypingSpeed(TMPE_TypeWriter typeWriter, float speed) => Debug.LogWarning(nameof(SetTypingSpeed) + " is not implemented");
+        public virtual void SetTypingEffectSpeed(TMPE_TypeWriter typeWriter, float speed) => Debug.LogWarning(nameof(SetTypingEffectSpeed) + " is not implemented");
+        public virtual float GetElapsedTimeForTyping(TMPE_TypeWriter typeWriter) {
             Debug.LogWarning(nameof(GetElapsedTimeForTyping) + " is not implemented");
             return 0;
         }
-        public virtual float GetElapsedTimeForTypingEffect(TMPE_EffectorBase effector, int characterInfoIndex) {
+        public virtual float GetElapsedTimeForTypingEffect(TMPE_TypeWriter typeWriter, int characterInfoIndex) {
             Debug.LogWarning(nameof(GetElapsedTimeForTypingEffect) + " is not implemented");
             return 0;
         }
-        public abstract bool IsTypedCharacter(TMPE_EffectorBase effector, int characterInfoIndex);
+        public abstract bool IsTypedCharacter(TMPE_TypeWriter typeWriter, int characterInfoIndex);
 
         // TypeWriterControlTag
         private static string[] _emptyTagNames = new string[0];

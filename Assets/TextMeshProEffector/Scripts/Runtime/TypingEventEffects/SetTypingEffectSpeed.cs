@@ -13,12 +13,12 @@ namespace TextMeshProEffector.TypingEventEffects {
             return true;
         }
 
-        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_EffectorBase effector, TMPE_TypingBehaviourBase typingBehaviour, int characterInfoIndex) {
+        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_TypeWriter typeWriter, TMPE_TypingBehaviourBase typingBehaviour, int characterInfoIndex) {
             float speed = _speed;
             if(tag != null && string.IsNullOrEmpty(tag.Value) == false) {
                 speed = float.Parse(tag.Value);
             }
-            typingBehaviour.SetTypingEffectSpeed(effector, speed);
+            typingBehaviour.SetTypingEffectSpeed(typeWriter, speed);
         }
     }
 }

@@ -9,17 +9,17 @@ namespace TextMeshProEffector {
         [SerializeReference] private List<TMPE_TypingEventEffect> _typingEventEffects;
         public List<TMPE_TypingEventEffect> TypingEventEffects => _typingEventEffects;
 
-        public void ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming timing, TMPE_EffectorBase effector, int typeWriterIndex, int typeIndex) {
+        public void ProcessTypingEvents(TMPE_TypingEventEffect.TriggerTiming timing, TMPE_TypeWriter typeWriter, int typeWriterIndex, int typeIndex) {
+            TMPE_EffectorBase effector = typeWriter.Effector;
             TMP_TextInfo textInfo = effector.TextInfo;
             TMP_CharacterInfo characterInfo = textInfo.characterInfo[typeIndex];
             int indexInTmpeTagRemovedText = characterInfo.index;
             List<TMPE_Tag> tags = effector.TagContainer.TypingEventTags[typeWriterIndex];
-            TMPE_TypeWriter typeWriter = effector.TypeWriters[typeWriterIndex];
 
             foreach(TMPE_TypingEventEffect typingEventEffect in _typingEventEffects) {
                 if(typingEventEffect == null) continue;
                 if(timing == typingEventEffect.Timing && string.IsNullOrEmpty(typingEventEffect.TagName)) {
-                    typingEventEffect.OnEventTriggerd(null, effector, typeWriter.TypingBehaviour, typeIndex);
+                    typingEventEffect.OnEventTriggerd(null, typeWriter, typeWriter.TypingBehaviour, typeIndex);
                 }
             }
             
@@ -30,7 +30,7 @@ namespace TextMeshProEffector {
                 foreach(TMPE_TypingEventEffect typingEventEffect in _typingEventEffects) {
                     if(typingEventEffect == null) continue;
                     if(timing == typingEventEffect.Timing && typingEventEffect.TagName == tag.Name) {
-                        typingEventEffect.OnEventTriggerd(tag, effector, typeWriter.TypingBehaviour, typeIndex);
+                        typingEventEffect.OnEventTriggerd(tag, typeWriter, typeWriter.TypingBehaviour, typeIndex);
                     }
                 }
             }

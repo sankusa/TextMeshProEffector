@@ -8,14 +8,14 @@ namespace TextMeshProEffector {
         [SerializeReference] protected List<TMPE_TypingEffect> _typingEffects;
         public List<TMPE_TypingEffect> TypingEffects => _typingEffects;
 
-        public virtual bool UpdateVertex(TMPE_EffectorBase effector, int typeWriterIndex) {
-            TMPE_TypingBehaviourBase typingBehaviour = effector.TypeWriters[typeWriterIndex].TypingBehaviour;
-            List<TMPE_Tag> tags = effector.TagContainer.TypingTags[typeWriterIndex];
+        public virtual bool UpdateVertex(TMPE_TypeWriter typeWriter, int typeWriterIndex) {
+            TMPE_TypingBehaviourBase typingBehaviour = typeWriter.TypingBehaviour;
+            List<TMPE_Tag> tags = typeWriter.Effector.TagContainer.TypingTags[typeWriterIndex];
             bool isPlaying = false;
             foreach(TMPE_TypingEffect typingEffect in _typingEffects) {
                 if(typingEffect == null) continue;
                 if(string.IsNullOrEmpty(typingEffect.TagName)) {
-                    isPlaying |= typingEffect.UpdateVertex(null, effector, typingBehaviour);
+                    isPlaying |= typingEffect.UpdateVertex(null, typeWriter, typingBehaviour);
                 }
             }
 
@@ -23,7 +23,7 @@ namespace TextMeshProEffector {
                 foreach(TMPE_TypingEffect typingEffect in _typingEffects) {
                     if(typingEffect == null) continue;
                     if(typingEffect.TagName == tag.Name) {
-                        isPlaying |= typingEffect.UpdateVertex(tag, effector, typingBehaviour);
+                        isPlaying |= typingEffect.UpdateVertex(tag, typeWriter, typingBehaviour);
                     }
                 }
             }
