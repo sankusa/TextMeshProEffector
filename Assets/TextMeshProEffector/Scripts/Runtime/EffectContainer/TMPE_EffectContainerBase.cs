@@ -6,6 +6,7 @@ namespace TextMeshProEffector {
     public abstract class TMPE_EffectContainerBase : ScriptableObject {
         public abstract void AddEffect(object effect);
         public abstract string FindTag(char[] charArrayContainsTag, int tagNameStartIndex, int tagNameEndIndex);
+        public abstract bool ValidateTag(TMPE_Tag tag);
     }
 
     public abstract class TMPE_EffectContainerBase<T> : TMPE_EffectContainerBase where T : TMPE_EffectBase {
@@ -20,7 +21,7 @@ namespace TextMeshProEffector {
             _effects.Add(effect);
         }
 
-        public bool ValidateTag(TMPE_Tag tag) {
+        public override bool ValidateTag(TMPE_Tag tag) {
             foreach(T effect in _effects) {
                 if(effect == null) continue;
                 if(effect.ValidateTag(tag)) {

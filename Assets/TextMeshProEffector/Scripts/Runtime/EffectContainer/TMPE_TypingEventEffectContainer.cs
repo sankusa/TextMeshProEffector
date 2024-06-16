@@ -15,7 +15,7 @@ namespace TextMeshProEffector {
             foreach(TMPE_TypingEventEffect effect in _effects) {
                 if(effect == null) continue;
                 if(timing == effect.Timing && effect.HasTag() == false) {
-                    effect.OnEventTriggerd(null, typeWriter, typeWriter.TypingBehaviour, typeIndex);
+                    effect.OnEventTriggerd(null, typeWriter, typeIndex);
                 }
             }
             
@@ -24,12 +24,12 @@ namespace TextMeshProEffector {
             for(int i = 0; i < tags.Count; i++) {
                 TMPE_Tag tag = tags[i];
                 if(tag.IsClosed() == false && tag.StartIndex != indexInTmpeTagRemovedText) continue;
-                if(tag.IsClosed() && tag.IsInRange(indexInTmpeTagRemovedText) == false) continue;
+                if(tag.IsClosed() && tag.ContainsIndex(indexInTmpeTagRemovedText) == false) continue;
 
                 foreach(TMPE_TypingEventEffect effect in _effects) {
                     if(effect == null) continue;
                     if(timing == effect.Timing && effect.TagName == tag.Name) {
-                        effect.OnEventTriggerd(tag, typeWriter, typeWriter.TypingBehaviour, typeIndex);
+                        effect.OnEventTriggerd(tag, typeWriter, typeIndex);
                     }
                 }
             }

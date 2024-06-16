@@ -25,7 +25,7 @@ namespace TextMeshProEffector {
             TMPE_EffectorBase effector = target as TMPE_EffectorBase;
 
             SerializedProperty useTypeWriterProp = serializedObject.FindProperty("_useTypeWriter");
-            SerializedProperty defaultVisiblityProp = serializedObject.FindProperty("_defaultVisiblity");
+            SerializedProperty defaultTypingStateProp = serializedObject.FindProperty("_defaultTypingState");
             SerializedProperty basicEffectContainersProp = serializedObject.FindProperty("_basicEffectContainers");
             SerializedProperty typeWritersProp = serializedObject.FindProperty("_typeWriters");
             
@@ -43,7 +43,7 @@ namespace TextMeshProEffector {
                 }
             }
 
-            EditorGUILayout.PropertyField(defaultVisiblityProp);
+            EditorGUILayout.PropertyField(defaultTypingStateProp);
 
             // エフェクトコンテナ
             using (new EditorGUILayout.HorizontalScope()) {
@@ -54,8 +54,8 @@ namespace TextMeshProEffector {
             }
 
             // タイプライター
-            EditorGUILayout.LabelField("TypeWriter");
-            using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
+            // EditorGUILayout.LabelField("TypeWriter");
+            // using (new EditorGUILayout.VerticalScope(GroupBoxSkin)) {
                 if(_typeWriterList == null) {
                     _typeWriterList = new ReorderableList(serializedObject, typeWritersProp) {
                         drawHeaderCallback = (rect) => {
@@ -73,7 +73,7 @@ namespace TextMeshProEffector {
 
                 SerializedProperty onTypingCompletedProp = serializedObject.FindProperty("_onTypingCompleted");
                 EditorGUILayout.PropertyField(onTypingCompletedProp);
-            }
+            // }
 
             serializedObject.ApplyModifiedProperties();
         }

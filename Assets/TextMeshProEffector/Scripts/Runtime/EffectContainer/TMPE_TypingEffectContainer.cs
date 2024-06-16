@@ -4,15 +4,14 @@ using UnityEngine;
 namespace TextMeshProEffector {
     [CreateAssetMenu(menuName = nameof(TextMeshProEffector) + "/" + nameof(TMPE_TypingEffectContainer), fileName = nameof(TMPE_TypingEffectContainer))]
     public class TMPE_TypingEffectContainer : TMPE_EffectContainerBase<TMPE_TypingEffect> {
-        public virtual bool UpdateVertex(TMPE_TypeWriter typeWriter, int typeWriterIndex) {
-            TMPE_TypingBehaviourBase typingBehaviour = typeWriter.TypingBehaviour;
+        public virtual bool UpdateVertex(TMPE_TypeWriter typeWriter) {
             bool isPlaying = false;
 
             // タグ無し
             foreach(TMPE_TypingEffect typingEffect in _effects) {
                 if(typingEffect == null) continue;
                 if(typingEffect.HasTag() == false) {
-                    isPlaying |= typingEffect.UpdateVertex(null, typeWriter, typingBehaviour);
+                    isPlaying |= typingEffect.UpdateVertex(null, typeWriter);
                 }
             }
 
@@ -23,7 +22,7 @@ namespace TextMeshProEffector {
                 foreach(TMPE_TypingEffect typingEffect in _effects) {
                     if(typingEffect == null) continue;
                     if(typingEffect.TagName == tag.Name) {
-                        isPlaying |= typingEffect.UpdateVertex(tag, typeWriter, typingBehaviour);
+                        isPlaying |= typingEffect.UpdateVertex(tag, typeWriter);
                     }
                 }
             }

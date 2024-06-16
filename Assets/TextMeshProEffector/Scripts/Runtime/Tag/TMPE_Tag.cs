@@ -38,8 +38,8 @@ namespace TextMeshProEffector {
         public string Value {
             get => _value;
             set {
-                if(_value == null) throw new ArgumentNullException(nameof(value));
-                if(_value.Length == 0) throw new ArgumentException("Parameter cannot be empty", nameof(value));
+                if(value == null) throw new ArgumentNullException(nameof(value));
+                if(value.Length == 0) throw new ArgumentException("Parameter cannot be empty", nameof(value));
 
                 _value = value;
             }
@@ -88,7 +88,7 @@ namespace TextMeshProEffector {
             if(IsClosed() == false) Close(endIndex);
         }
 
-        public bool IsInRange(int index) {
+        public bool ContainsIndex(int index) {
             if(IsClosed() == false) throw new InvalidOperationException("Tag needs to be closed");
 
             return _startIndex <= index && index <= _endIndex;

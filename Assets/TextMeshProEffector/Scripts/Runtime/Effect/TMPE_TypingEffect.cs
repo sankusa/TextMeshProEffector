@@ -4,15 +4,16 @@ using TMPro;
 namespace TextMeshProEffector {
     [Serializable]
     public abstract class TMPE_TypingEffect : TMPE_EffectBase {
-        public virtual bool UpdateVertex(TMPE_Tag tag, TMPE_TypeWriter typeWriter, TMPE_TypingBehaviourBase typingBehaviour) {
+        public virtual bool UpdateVertex(TMPE_Tag tag, TMPE_TypeWriter typeWriter) {
             TMPE_EffectorBase effector = typeWriter.Effector;
             TMP_TextInfo textInfo = effector.TextInfo;
             bool isPlaying = false;
             for(int i = 0; i < textInfo.characterCount; i++) {
                 TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
-                if(tag == null || tag.IsInRange(charInfo.index)) {
-                    if(effector.TypingInfo[i].Visiblity == CharacterVisiblity.Visible && typingBehaviour.IsTypedCharacter(typeWriter, i)) {
-                        isPlaying |= UpdateVertexByCharacter(tag, effector, i, typingBehaviour.GetElapsedTimeForTypingEffect(typeWriter, i));
+                TMPE_CharacterTypingStatus charStatus = typeWriter.CharacterTypingStatuses[i];
+                if(tag == null || tag.ContainsIndex(charInfo.index)) {
+                    if(effector.TypingInfo[i].IsTyped() && charStatus.IsTyped()) {
+                        isPlaying |= UpdateVertexByCharacter(tag, effector, i, charStatus.ElapsedTimeForTypingEffect);
                     }
                 }
             }

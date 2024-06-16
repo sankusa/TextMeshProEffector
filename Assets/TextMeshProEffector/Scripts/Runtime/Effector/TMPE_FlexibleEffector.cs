@@ -4,6 +4,9 @@ using Object = UnityEngine.Object;
 using System.Reflection;
 
 namespace TextMeshProEffector {
+    // TMP_Textへ直接文字列を設定してもタグの抽出ができるが、
+    // その場合の動作が複雑(エディタ上とビルド時で処理の流れがかなり異なる)で、微小だがアロケーションも発生する
+    // 加えて特定ケースで文字列の変更が検知できない問題もある
     [ExecuteAlways, RequireComponent(typeof(TMP_Text))]
     public class TMPE_FlexibleEffector : TMPE_EffectorBase {
         // テキスト成形+タグ抽出のモジュール
@@ -37,95 +40,88 @@ namespace TextMeshProEffector {
 #endif
         }
 
-        // TMPro_EventManager.TEXT_CHANGED_EVENTは元をたどるとCanvas.willRenderCanvasesイベントから呼び出される
-        // (LateUpdateよりも遅いタイミング)
-        // (※ForceMeshUpdate()を呼んだ場合はTMPro_EventManager.TEXT_CHANGED_EVENTが即時呼ばれる)
-        // Canvas.willRenderCanvasesより後に実行されるライフサイクル関数が見つからないため、ジオメトリの加工はUpdateで行うが
-        // テキスト変更時のフレームでは、ジオメトリ加工後にテキスト変更に起因するメッシュの再生成が行われるため
-        // 1フレームだけ未加工のジオメトリが表示されてしまう
-        // 対策として、テキスト変更時は再度ジオメトリ加工を行う
         protected override void OnTextChanged(Object obj) {
-            if(obj == _textComponent) {
-                if(_skipOnTextChanged) {
-                    _skipOnTextChanged = false;
-                    return;
+            if(obj != _textComponent) return;
+
+            if(_skipOnTextChanged) {
+                _skipOnTextChanged = false;
+                return;
+            }
+
+            if(_setTextCalled) {
+                _setTextCalled = false;
+                UpdateCharacterInfoOld();
+                _originalVertexData.StoreOriginalVertexData(_textInfo);
+                UpdateGeometry();
+                return;
+            }
+
+            TMP_CharacterInfo[] characterInfo = _textInfo.characterInfo;
+            
+            // テキストが変更されたかチェック
+            _characterInfoOld ??= new TMPE_TextBuffer();
+            if(_characterInfoOld.Capacity < _textInfo.characterCount) {
+                _characterInfoOld.Initialize(Mathf.NextPowerOfTwo(_textInfo.characterCount));
+            }
+
+            bool different = _textInfo.characterCount != _characterInfoOld.Length;
+            int checkIndex = 0;
+            // 比較
+            for(; checkIndex < _textInfo.characterCount; checkIndex++) {
+                if(characterInfo[checkIndex].character != _characterInfoOld[checkIndex]) {
+                    different = true;
+                    break;
+                }
+            }
+            // 次の比較用にコピー
+            for(; checkIndex < _textInfo.characterCount; checkIndex++) {
+                _characterInfoOld[checkIndex] = characterInfo[checkIndex].character;
+            }
+            _characterInfoOld.Length = _textInfo.characterCount;
+
+            // テキスト変更時
+            if(different) {
+                // 設定された文字列からタグを除去してタグ情報のオブジェクトを作成
+                if(_textBackingArrayInfo == null) {
+                    _textBackingArrayInfo = typeof(TMP_Text).GetField("m_TextBackingArray", BindingFlags.NonPublic | BindingFlags.Instance);
+                    _textBackingArray_arrayInfo = _textBackingArrayInfo.FieldType.GetField("m_Array", BindingFlags.NonPublic | BindingFlags.Instance);
+                    _textBackingArray_countInfo = _textBackingArrayInfo.FieldType.GetField("m_Count", BindingFlags.NonPublic | BindingFlags.Instance);
+                    _inputSourceInfo = typeof(TMP_Text).GetField("m_inputSource", BindingFlags.NonPublic | BindingFlags.Instance);
                 }
 
-                if(_setTextCalled) {
-                    _setTextCalled = false;
-                    UpdateCharacterInfoOld();
-                    CacheVertexData();
-                    UpdateGeometry();
-                    return;
-                }
-
-                TMP_CharacterInfo[] characterInfo = _textInfo.characterInfo;
-                
-                // テキストが変更されたかチェック
-                _characterInfoOld ??= new TMPE_TextBuffer();
-                if(_characterInfoOld.Capacity < _textInfo.characterCount) {
-                    _characterInfoOld.Initialize(Mathf.NextPowerOfTwo(_textInfo.characterCount));
-                }
-
-                bool different = _textInfo.characterCount != _characterInfoOld.Length;
-                int checkIndex = 0;
-                // 比較
-                for(; checkIndex < _textInfo.characterCount; checkIndex++) {
-                    if(characterInfo[checkIndex].character != _characterInfoOld[checkIndex]) {
-                        different = true;
-                        break;
-                    }
-                }
-                // 次の比較用にコピー
-                for(; checkIndex < _textInfo.characterCount; checkIndex++) {
-                    _characterInfoOld[checkIndex] = characterInfo[checkIndex].character;
-                }
-                _characterInfoOld.Length = _textInfo.characterCount;
-
-                // テキスト変更時
-                if(different) {
-                    // 設定された文字列からタグを除去してタグ情報のオブジェクトを作成
-                    if(_textBackingArrayInfo == null) {
-                        _textBackingArrayInfo = typeof(TMP_Text).GetField("m_TextBackingArray", BindingFlags.NonPublic | BindingFlags.Instance);
-                        _textBackingArray_arrayInfo = _textBackingArrayInfo.FieldType.GetField("m_Array", BindingFlags.NonPublic | BindingFlags.Instance);
-                        _textBackingArray_countInfo = _textBackingArrayInfo.FieldType.GetField("m_Count", BindingFlags.NonPublic | BindingFlags.Instance);
-                        _inputSourceInfo = typeof(TMP_Text).GetField("m_inputSource", BindingFlags.NonPublic | BindingFlags.Instance);
-                    }
-
-                    // リッチテキストタグなどが除去される前のテキストを取得
-                    object textBackingArray = _textBackingArrayInfo.GetValue(_textComponent);
-                    uint[] textBackingArray_array = (uint[]) _textBackingArray_arrayInfo.GetValue(textBackingArray);
-                    int textBackingArray_count = (int) _textBackingArray_countInfo.GetValue(textBackingArray);
+                // リッチテキストタグなどが除去される前のテキストを取得
+                object textBackingArray = _textBackingArrayInfo.GetValue(_textComponent);
+                uint[] textBackingArray_array = (uint[]) _textBackingArray_arrayInfo.GetValue(textBackingArray);
+                int textBackingArray_count = (int) _textBackingArray_countInfo.GetValue(textBackingArray);
 
 #if UNITY_EDITOR
-                    // internal enum TextInputSources { TextInputBox = 0, SetText = 1, SetTextArray = 2, TextString = 3 };
-                    // 0,3の場合はTMP_Text内部でtextPreprocessorを使って文字列がパースされる
-                    int inputSource = (int) _inputSourceInfo.GetValue(_textComponent);
-                    // ITextPreprocessorを通さないケースの場合は文字列を流し直して無理やりITextPreprocessorを通す
-                    if(inputSource == 1 || inputSource == 2) {
-                        _textComponent.SetText(_textComponent.text);
-                    }
+                // internal enum TextInputSources { TextInputBox = 0, SetText = 1, SetTextArray = 2, TextString = 3 };
+                // 0,3の場合はTMP_Text内部でtextPreprocessorを使って文字列がパースされる
+                int inputSource = (int) _inputSourceInfo.GetValue(_textComponent);
+                // ITextPreprocessorを通さないケースの場合は文字列を流し直して無理やりITextPreprocessorを通す
+                if(inputSource == 1 || inputSource == 2) {
+                    _textComponent.SetText(_textComponent.text);
+                }
 #else
-                    // 加工+タグ情報オブジェクト生成
-                    _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
-                    _textPreprocessor.ProcessText(this);
-                    _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
+                // 加工+タグ情報オブジェクト生成
+                _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
+                _textPreprocessor.ProcessText(this);
+                _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
 #endif
-                    // テキスト変更時共通処理
-                    ResetTypinRelatedValues();
 
-                    _skipOnTextChanged = true;
-                    _textComponent.ForceMeshUpdate(true);
+                ResetTypinStatus();
 
-                    UpdateCharacterInfoOld();
-                    CacheVertexData();
-                    UpdateGeometry();
-                }
-                else {
-                    // テキスト以外のプロパティ変更時
-                    CacheVertexData();
-                    UpdateGeometry();
-                }
+                _skipOnTextChanged = true;
+                _textComponent.ForceMeshUpdate(true);
+
+                UpdateCharacterInfoOld();
+                _originalVertexData.StoreOriginalVertexData(_textInfo);
+                UpdateGeometry();
+            }
+            // テキスト以外のプロパティ変更時
+            else {
+                _originalVertexData.StoreOriginalVertexData(_textInfo);
+                UpdateGeometry();
             }
         }
 

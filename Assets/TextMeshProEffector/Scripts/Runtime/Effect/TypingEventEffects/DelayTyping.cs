@@ -9,8 +9,8 @@ namespace TextMeshProEffector.TypingEventEffects {
 
         [SerializeField] private float _seconds;
         
-        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_TypeWriter typeWriter, TMPE_TypingBehaviourBase typingBehaviour, int characterInfoIndex) {
-            typingBehaviour.DelayTyping(typeWriter, _seconds);
+        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_TypeWriter typeWriter, int characterInfoIndex) {
+            typeWriter.TypingDelay = _seconds;
         }
     }
 }

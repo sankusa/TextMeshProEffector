@@ -8,7 +8,7 @@ namespace TextMeshProEffector {
             TMP_TextInfo textInfo = effector.TextInfo;
             for(int i = 0; i < textInfo.characterCount; i++) {
                 TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
-                if(tag == null || tag.IsInRange(charInfo.index)) {
+                if(tag == null || tag.ContainsIndex(charInfo.index)) {
                     UpdateVertexByCharacter(tag, effector, i);
                 }
             }

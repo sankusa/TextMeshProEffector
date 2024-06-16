@@ -8,10 +8,10 @@ namespace TextMeshProEffector.TypingEventEffects {
         [SerializeField] private string _targetCharacters;
         [SerializeField] private float _seconds;
 
-        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_TypeWriter typeWriter, TMPE_TypingBehaviourBase typingBehaviour, int characterInfoIndex) {
+        public override void OnEventTriggerd(TMPE_Tag tag, TMPE_TypeWriter typeWriter, int characterInfoIndex) {
             TMP_CharacterInfo characterInfo = typeWriter.Effector.TextInfo.characterInfo[characterInfoIndex];
             if(_targetCharacters.IndexOf(characterInfo.character) != -1) {
-                typingBehaviour.DelayTyping(typeWriter, _seconds);
+                typeWriter.TypingDelay = _seconds;
             }
         }
     }

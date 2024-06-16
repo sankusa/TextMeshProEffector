@@ -15,27 +15,16 @@ namespace TextMeshProEffector {
             SerializedProperty typingBehaviourProp = serializedObject.FindProperty("_typingBehaviour");
             SerializedProperty typingEffectContainersProp = serializedObject.FindProperty("_typingEffectContainers");
             SerializedProperty typingEventEffectContainersProp = serializedObject.FindProperty("_typingEventEffectContainers");
-            SerializedProperty visualizeCharactersProp = serializedObject.FindProperty("_visualizeCharacters");
+            SerializedProperty setToTypedProp = serializedObject.FindProperty("_setToTyped");
             SerializedProperty startTypingAutoProp = serializedObject.FindProperty("_startTypingAuto");
 
             using (new EditorGUILayout.HorizontalScope()) {
                 Object newTypeWriterObj = EditorGUILayout.ObjectField(ObjectNames.NicifyVariableName(typingBehaviourProp.name), typingBehaviourProp.objectReferenceValue, typeof(TMPE_TypingBehaviourBase), false);
                 if(newTypeWriterObj != typingBehaviourProp.objectReferenceValue) {
-                    TMPE_TypingBehaviourBase oldTB = typingBehaviourProp.objectReferenceValue as TMPE_TypingBehaviourBase;
-                    TMPE_TypingBehaviourBase newTB = newTypeWriterObj as TMPE_TypingBehaviourBase;
-
-                    if(oldTB != null) {
-                        oldTB.OnDetach(typeWriter);
-                    }
-
                     typingBehaviourProp.objectReferenceValue = newTypeWriterObj;
-
                     serializedObject.ApplyModifiedProperties();
-                    
-                    if(newTB != null) {
-                        newTB.OnAttach(typeWriter);
-                        newTB.OnTextChanged(typeWriter);
-                    }
+
+                    typeWriter.ResetTypinRelatedValues();
                 }
 
                 if(GUILayout.Button("Inspector", GUILayout.Width(70), GUILayout.Height(EditorGUIUtility.singleLineHeight))) {
@@ -55,7 +44,7 @@ namespace TextMeshProEffector {
 
             EditorGUILayout.Separator();
 
-            EditorGUILayout.PropertyField(visualizeCharactersProp);
+            EditorGUILayout.PropertyField(setToTypedProp);
             EditorGUILayout.PropertyField(startTypingAutoProp);
 
             if(startTypingAutoProp.enumValueIndex == (int)AutoStartTypingType.OnOtherTypeWriterStartedTyping) {

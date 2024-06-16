@@ -194,7 +194,7 @@ namespace TextMeshProEffector {
                             if(tag != null) {
                                 if(correctFormat) {
                                     // Tagチェック
-                                    if(tagType == TagType.Basic && effector.IsValidBasicTag(tag)) {
+                                    if(tagType == TagType.Basic && effector.BasicEffectContainers.ValidateTag(tag)) {
                                         tag.Open(_destination.Length);
                                         basicTagContainer.AddTag(tag);
                                         isValidTag = true;
@@ -202,7 +202,7 @@ namespace TextMeshProEffector {
                                     else if(tagType == TagType.Typing) {
                                         if(typeWriterIndex != TYPEWRITER_INDEX_UNSETTED) {
                                             TMPE_TypeWriter typeWriter = typeWriters[typeWriterIndex];
-                                            if(typeWriter != null && typeWriter.IsValidTypingTag(tag)) {
+                                            if(typeWriter != null && typeWriter.TypingEffectContainers.ValidateTag(tag)) {
                                                 tag.Open(_destination.Length);
                                                 effector.TypeWriters[typeWriterIndex].TypingTagContainer.AddTag(tag);
                                                 isValidTag = true;
@@ -212,7 +212,7 @@ namespace TextMeshProEffector {
                                     else if(tagType == TagType.TypingEvent) {
                                         if(typeWriterIndex != TYPEWRITER_INDEX_UNSETTED) {
                                             TMPE_TypeWriter typeWriter = typeWriters[typeWriterIndex];
-                                            if(typeWriter != null && typeWriter.IsValidTypingEventTag(tag)) {
+                                            if(typeWriter != null && typeWriter.TypingEventEffectContainers.ValidateTag(tag)) {
                                                 tag.Open(_destination.Length);
                                                 effector.TypeWriters[typeWriterIndex].TypingEventTagContainer.AddTag(tag);
                                                 isValidTag = true;
