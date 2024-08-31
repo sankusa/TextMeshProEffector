@@ -104,8 +104,7 @@ namespace TextMeshProEffector {
                 }
 #else
                 // 加工+タグ情報オブジェクト生成
-                _textPreprocessor.Source.Initialize(textBackingArray_array, textBackingArray_count);
-                _textPreprocessor.ProcessText(this);
+                _textPreprocessor.ProcessText(this, textBackingArray_array, textBackingArray_count);
                 _textComponent.SetCharArray(_textPreprocessor.Destination.Array, 0, _textPreprocessor.Destination.Length);
 #endif
 

@@ -22,6 +22,11 @@ namespace TextMeshProEffector {
             ProcessTextInternal(effector);
         }
 
+        public void ProcessText(TMPE_EffectorBase effector, uint[] sourceText, int length) {
+            _source.Initialize(sourceText, length);
+            ProcessTextInternal(effector);
+        }
+
         private void ProcessTextInternal(TMPE_EffectorBase effector) {
             IReadOnlyList<TMPE_BasicEffectContainer> effectContainers = effector.BasicEffectContainers;
             TMPE_TagContainer basicTagContainer = effector.BasicTagContainer;

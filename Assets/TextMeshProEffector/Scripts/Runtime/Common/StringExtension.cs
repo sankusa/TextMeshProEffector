@@ -2,7 +2,7 @@ using System;
 
 namespace TextMeshProEffector {
     public static class StringExtension {
-        public static bool EqualsPartialCharArray(this string search, char[] target, int targetStartIndex, int targetEndIndex) {
+        internal static bool EqualsPartialCharArray(this string search, char[] target, int targetStartIndex, int targetEndIndex) {
             if(search == null) throw new ArgumentNullException(nameof(search));
             if(target == null) throw new ArgumentNullException(nameof(target));
             if(targetStartIndex < 0 || target.Length <= targetStartIndex) throw new ArgumentOutOfRangeException(nameof(targetStartIndex));
