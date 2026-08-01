@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEventEffects {
+    [System.Serializable]
     public class DelayTyping : TMPE_TypingEventEffect {
         public override TriggerTiming Timing => TriggerTiming.BeforeTyping;
 

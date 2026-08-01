@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.BasicEffects {
+    [System.Serializable]
     public class Shake : TMPE_BasicEffect {
         [SerializeField] private float _amplitude = 1;
         [SerializeField, Min(0)] private float _interval = 0;

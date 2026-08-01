@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="TextMeshProEffector.csproj" />
+  <Project Path="TextMeshProEffector.Editor.csproj" />
+</Solution>

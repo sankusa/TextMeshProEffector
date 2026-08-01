@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEffects {
+    [System.Serializable]
     public class Move : TMPE_TypingEffect {
         [SerializeField, Min(0)] private float _delay;
         [SerializeField, Min(0)] private float _duration;

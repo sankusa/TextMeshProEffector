@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.BasicEffects {
+    [System.Serializable]
     public class Wave : TMPE_BasicEffect {
         [SerializeField] private Vector3 _amplitude = Vector3.zero;
         [SerializeField] private Vector3 _duration = Vector3.zero;

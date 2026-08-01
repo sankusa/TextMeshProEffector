@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEventEffects {
+    [System.Serializable]
     public class DelayTypingIfTargetCharacter : TMPE_TypingEventEffect {
         [SerializeField] private string _targetCharacters;
         [SerializeField] private float _seconds;

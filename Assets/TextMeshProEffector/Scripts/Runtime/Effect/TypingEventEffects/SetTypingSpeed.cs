@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 
 namespace TextMeshProEffector.TypingEventEffects {
+    [System.Serializable]
     public class SetTypingSpeed : TMPE_TypingEventEffect {
         [SerializeField, Min(0)] private float _speed;
 
